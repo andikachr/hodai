@@ -1,233 +1,124 @@
-<div align="center">
-  <img width="600" src="assets/branding/spotube_banner.png" alt="Spotube Logo">
+<p align="center">
+  <img src="assets/branding/hodai-logo.png" alt="Hodai logo" width="160">
+</p>
 
-A cross-platform extensible open-source music streaming platform.<br>
-Bring your own music metadata/playlist/audio-source with plugins created by community or by
-yourself. A small step towards the decentralized music streaming era!
+# Hodai
 
-<a href="https://spotube.cc"><img alt="Visit the website" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/website_vector.svg"></a>
-<a href="https://discord.gg/uJ94vxB6vg"><img alt="Discord Server" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/social/discord-plural_vector.svg"></a>
+Hodai is a free music player for Windows, Android, macOS, and Linux. Open it, search for something, and press play. There is no account to create and nothing to set up first.
 
-<a href="https://patreon.com/krtirtho"><img alt="Support me on Patron" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/patreon-singular_vector.svg"></a>
-<a href="https://www.buymeacoffee.com/krtirtho"><img alt="Buy me a Coffee" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/buymeacoffee-singular_vector.svg"></a>
+The name comes from hōdai (放題), the Japanese word behind phrases like "all you can eat". Hodai works the same way: a large catalogue of music that anyone can open and play, with no subscription in the way.
 
-[![HackerNews](https://hackerbadge.vercel.app/api?id=39066136&type=dark)](https://news.ycombinator.com/item?id=39066136)
+*Screenshots coming soon.*
 
-<a href="https://opencollective.com/spotube"><img src="https://opencollective.com/spotube/donate/button.png?color=blue" alt="Donate to our Open Collective" height="45"></a>
+## What it does
 
----
+- Search and play songs, albums, artists, and playlists right away. The music source is configured before you ever open the app, so the first launch goes straight to music.
+- Synced lyrics that follow along with the song.
+- Downloads for offline listening, saved with their tags.
+- Group Jam rooms, where friends on different devices listen to the same queue together.
+- Your own playlists, plus a local library for audio files already on your device.
+- No ads, no telemetry, and no data collection. Playback happens on your device.
+- Plugins, if you want to connect other music sources. The plugin format is compatible with Spotube plugins.
 
-![Spotube Desktop](assets/feature-graphics/readme-hero.png)
-![Spotube Mobile](assets/feature-graphics/readme-mobile.png)
+## Download
 
-****</div>
+All builds are on the [Releases page](https://github.com/andikachr/hodai/releases). Grab the file for your system.
 
-## 🌃 Features
+### Windows
 
-- 🧩 Plugin powered, supports any platform or custom music service through plugins.
-- 🗺️ Community driven plugins for popular platforms or create your own.
-- ⬇️ Freely downloadable tracks with tagged **metadata**.
-- 🖥️ 📱 Cross-platform support.
-- 🪶 Small size & less data usage.
-- 🕒 Time synced lyrics regardless of the plugin support.
-- ✋ No telemetry, diagnostics or user data collection.
-- 🚀 Native performance.
-- 📖 Open source/libre software.
-- 🔉 Playback control is done locally, not on the server.
+Download `Hodai-windows-x86_64-setup.exe` and run it. It installs for your user account, so you do not need administrator rights.
 
-### ⬇️ Download
+### Android
 
-Download Spotube from the Official Website: https://spotube.cc
+Download the APK and open it on your phone. The first time, Android will ask you to allow installs from your browser or file manager.
 
-### 🔄 Nightly Builds
+### macOS
 
-Grab the latest nightly builds of
-Spotube [from the Offical Website](https://spotube.cc/downloads/nightly).
+Download `Hodai-macos-apple-silicon.dmg`, open it, and move Hodai to your Applications folder. Builds are for Apple Silicon Macs. Intel Macs are not supported, because the native build tools cannot cross-compile for them.
 
-<details>
-<summary>
-<h3 style="display: inline;">🕳️ Building from source [Click to expand]</h3>
-</summary>
-<hr/>
-<a href="https://github.com/team-spotube/spotube/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/KRTirtho/spotube/spotube-release-binary.yml?+label=Build%20Status"></a>
+### Linux
 
-Spotube is a Compose Multiplatform app.
+Download `hodai-linux-<version>-<arch>.tar.xz`, extract it, and run the app inside. Package templates for AUR, Flatpak, Chocolatey, Homebrew, and WinGet live in the `packaging` folder of this repository.
 
-### 1. Prerequisites
+### iPhone and iPad
 
-- **JDK 21** to run Gradle (the Gradle daemon JDK and GraalVM are provisioned automatically).
-- **Rust** (`rustup` + `cargo`), for the `composeApp` library built
-  through [Gobley](https://gobley.dev).
-- **Android SDK**, only for Android builds.
-- **[ComposeNativeWebview](https://github.com/kdroidFilter/ComposeNativeWebview)**, which isn't on
-  Maven Central yet. Clone it at the commit pinned as `COMPOSE_WEBVIEW_COMMIT` in [
-  `spotube-release-binary.yml`](.github/workflows/spotube-release-binary.yml) and run
-  `./gradlew publishToMavenLocal` in it.
-- **Linux only: runtime libraries, including VLC.** Needed to run the app, including
-  `:composeApp:run`:
+There is no App Store version. The Releases page includes an IPA file, which you can install with a sideloading tool such as AltStore. It works, but plan on a few extra steps, and iOS asks you to refresh sideloaded apps periodically.
 
-  | Distro                   | Command                                                                                                                                                          |
-  | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | Debian/Ubuntu            | `sudo apt-get install libvlc5 vlc-plugin-base libwebkit2gtk-4.1-0 libgtk-3-0 libasound2 libgl1 libxtst6 libxi6 libxrender1`                                      |
-  | Fedora                   | `sudo dnf install vlc-libs webkit2gtk4.1 gtk3 alsa-lib mesa-libGL libXtst libXi libXrender` (`vlc-libs` needs [RPM Fusion](https://rpmfusion.org/Configuration)) |
-  | Arch / CachyOS / Manjaro | `sudo pacman -S vlc webkit2gtk-4.1 gtk3 alsa-lib libglvnd libxtst libxi libxrender`                                                                              |
-  | openSUSE                 | `sudo zypper install libvlc5 libwebkit2gtk-4_1-0 libgtk-3-0 libasound2 Mesa-libGL1 libXtst6 libXi6 libXrender1`                                                  |
+## Building from source
 
-  On Ubuntu 24.04+/Debian 13, `libgtk-3-0` and `libasound2` are `libgtk-3-0t64` and `libasound2t64`;
-  apt resolves this itself.
+Hodai is a Kotlin and Compose Multiplatform app. Desktop builds are GraalVM native images.
 
-### 2. Run in development
+### Prerequisites
 
-Desktop (JVM), fastest edit/run loop
+- JDK 21, to run Gradle. The Gradle daemon JDK and GraalVM are provisioned automatically.
+- Rust (`rustup` and `cargo`), for the library built through [Gobley](https://gobley.dev).
+- Android SDK, for Android builds only.
+- [ComposeNativeWebview](https://github.com/kdroidFilter/ComposeNativeWebview), which is not on Maven Central yet. Clone it at the commit pinned as `COMPOSE_WEBVIEW_COMMIT` in [spotube-release-binary.yml](.github/workflows/spotube-release-binary.yml) and run `./gradlew publishToMavenLocal` in it.
+- On Linux, runtime libraries for VLC, GTK 3, and WebKitGTK 4.1. On Debian/Ubuntu:
+
+  `sudo apt-get install libvlc5 vlc-plugin-base libwebkit2gtk-4.1-0 libgtk-3-0 libasound2 libgl1 libxtst6 libxi6 libxrender1`
+
+  Fedora, Arch, and openSUSE use slightly different package names for the same libraries. On Ubuntu 24.04 and Debian 13, `libgtk-3-0` and `libasound2` are the `t64` variants, and apt resolves that on its own.
+
+### Run in development
+
+Desktop (JVM), the fastest edit and run loop:
+
 ```bash
 ./gradlew :composeApp:run
 ```
 
-Android debug APK
+Android debug APK:
+
 ```bash
 ./gradlew :composeApp:assembleStableDebug
 ```
-> Use `./gradlew :composeApp:assembleNightlyDebug` for the nightly channel.
 
-Development builds stay fast: the release-only optimizations below are skipped.
+Use `:composeApp:assembleNightlyDebug` for the nightly channel. Development builds skip the release-only optimizations below.
 
-### 3. Build the desktop app
+### Build the desktop app
 
-A native build takes **about 10 minutes**, uses **every CPU core** and peaks at **~15 GB of RAM**.
-It only happens for the tasks below, never for `run`.
+A native build takes about 10 minutes, uses every CPU core, and peaks at around 15 GB of RAM. It only happens for the tasks below, never for `run`.
 
-**Native toolchain** (Nucleus downloads GraalVM CE on the first build; set `GRAALVM_HOME` to use
-your own):
+Native toolchain per OS:
 
-| OS      | Requirements                                                                                                                                                                                                                                                    |
-| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Linux   | `gcc`, `zlib` headers, `patchelf`; `rpm` for `.rpm`, `fuse` + `zstd` for `.AppImage`. <br/>Debian/Ubuntu: `sudo apt-get install build-essential zlib1g-dev patchelf rpm fuse zstd`. <br/>Fedora: `sudo dnf install gcc zlib-devel patchelf rpm-build fuse zstd` |
-| macOS   | Xcode Command Line Tools (`xcode-select --install`)                                                                                                                                                                                                             |
-| Windows | Visual Studio Build Tools with "Desktop development with C++" (use an "x64 Native Tools" prompt if `native-image` can't find MSVC)                                                                                                                              |
+| OS      | Requirements |
+| ------- | ------------ |
+| Linux   | `gcc`, zlib headers, `patchelf`; `rpm` for .rpm, `fuse` and `zstd` for AppImage. Debian/Ubuntu: `sudo apt-get install build-essential zlib1g-dev patchelf rpm fuse zstd` |
+| macOS   | Xcode Command Line Tools (`xcode-select --install`) |
+| Windows | Visual Studio Build Tools with "Desktop development with C++" |
 
-**Build and run the app folder:**
+Build the app folder (Nucleus downloads GraalVM CE on the first build; set `GRAALVM_HOME` to use your own):
 
 ```bash
 ./gradlew :composeApp:createGraalvmNativeDistributable
 ```
-> Output folder: composeApp/build/compose/binaries/main/graalvm-app/
 
-Build and launch in one step
-```bash
-./gradlew :composeApp:runGraalvmNativeDistributable
-```
+Output: `composeApp/build/compose/binaries/main/graalvm-app/`. Build and launch in one step with `:composeApp:runGraalvmNativeDistributable`.
 
-Keep the `spotube` binary next to the libraries it was built with; it loads them from its own
-folder.
+Installers are built per OS, and each OS builds only its own:
 
-**Installers** (each OS builds only its own):
-
-| OS               | Command                                                                 |
-| ---------------- | ----------------------------------------------------------------------- |
+| OS               | Command |
+| ---------------- | ------- |
 | Linux            | `./gradlew :composeApp:packageGraalvmDeb :composeApp:packageGraalvmRpm` |
-| Linux (AppImage) | `./gradlew :composeApp:packageGraalvmAppImage -PappImage=true`          |
-| Windows          | `./gradlew :composeApp:packageGraalvmExe` (or `packageGraalvmMsi`)      |
-| macOS            | `./gradlew :composeApp:packageGraalvmDmg`                               |
-> Output folder: `composeApp/build/compose/binaries/main/graalvm-<format>`
+| Linux (AppImage) | `./gradlew :composeApp:packageGraalvmAppImage -PappImage=true` |
+| Windows          | `./gradlew :composeApp:packageGraalvmExe` (or `packageGraalvmMsi`) |
+| macOS            | `./gradlew :composeApp:packageGraalvmDmg` |
 
-> [!Tip]
-> Add `-Pnightly=true` for the nightly channel (separate icons and name).
+Output: `composeApp/build/compose/binaries/main/graalvm-<format>`. Add `-Pnightly=true` for the nightly channel, which uses separate icons and name.
 
-<details>
-<summary>How the Linux AppImage bundle works</summary>
+If a native build fails with reflection or JNI errors while `:composeApp:run` works, the reachability metadata needs an update: run `./gradlew :composeApp:runWithNativeAgent`, use the broken feature, close the window normally, and commit the updated `composeApp/graalvm/reachability-metadata.json`. Keep the hand-written `uk.co.caprica.vlcj.binding.lib.LibVlc` entry in that file, or playback fails to initialize.
 
-- [`DownloadLinuxGtkBundleTask`](buildSrc/src/main/kotlin/org/spotube/gradle/DownloadLinuxGtkBundleTask.kt)
-  downloads the Ubuntu 24.04 packages (audio-only VLC via
-  [vlcj-bundler](https://github.com/team-spotube/vlcj-bundler-gradle-plugin), GTK 3, WebKitGTK 4.1,
-  glib-networking), keeps only what GTK/WebKit reach and relocates the libraries with `patchelf`.
-  Needs `ar`, `tar`, `zstd`, `readelf`, `patchelf`.
-- WebKitGTK has its helper-process path compiled in, so
-  [`AppImageEnvironment`](composeApp/src/jvmMain/kotlin/org/spotube/spotube/core/appimage/AppImageEnvironment.kt)
-  patches it to a relative path and moves to that directory at startup. It also sets
-  `GIO_EXTRA_MODULES` and `WEBKIT_DISABLE_DMABUF_RENDERER=1` (the bundled WebKitGTK 2.44 never
-  paints against a newer host Mesa).
-- `main()` must call `GraalVmInitializer.initialize()` first: the VLC loader and the environment
-  setup read `compose.application.resources.dir`.
+Production mode turns on automatically for `package*`, `create*`, `notarize*`, and `nativeImageCompile` tasks. It switches the Rust library to its release profile and the desktop app to a size-optimized native image. Force it either way with `-Pproduction=true|false`.
 
-</details>
+### Releases
 
-### 4. Native build breaks, JVM works
+The `spotube-release-binary.yml` workflow runs manually (`workflow_dispatch`) as stable, beta, or nightly. Beta is the stable build as a draft release, tagged `v<version>-beta.N`, with `betaNumber` set in `composeApp/build.gradle.kts` and back to `null` for stable. Desktop platforms build their own installers on their own runners, and Android ships a signed APK.
 
-A native image is a closed world: everything reached through reflection, JNI or JNA (vlcj, Zipline,
-NewPipe, ktor, datastore, ...) must be declared at build time. Nucleus generates most of it; the
-rest lives in [`composeApp/graalvm/reachability-metadata.json`](composeApp/graalvm/reachability-metadata.json).
+## Credits
 
-Symptoms: `ClassNotFoundException`, `NoSuchMethodException` or `MissingReflectionRegistrationError`
-in the native binary, while `:composeApp:run` works.
+Hodai is built on [Spotube](https://github.com/team-spotube/spotube), an open source music client created by Kingkor Roy Tirtho and the Spotube contributors. The playback and plugin engine comes from their work, and Hodai keeps the same license. Thank you to everyone who has contributed to Spotube.
 
-1. `./gradlew :composeApp:runWithNativeAgent` starts the app on the JVM with GraalVM's tracing agent.
-2. Use the broken feature, then **close the window normally**. Ctrl+C discards the recording.
-3. Commit the updated JSON in `composeApp/graalvm/` and rebuild.
+## License
 
-> [!Tip]
-> `./gradlew :composeApp:runGraalvmNative` is a faster debug loop: a quick `-Ob` build that names the
-> missing registration.
-
-> [!Warning]
-> Keep the hand-written `uk.co.caprica.vlcj.binding.lib.LibVlc` entry, or playback fails to initialize.
-
-### 5. Production vs development builds
-
-Production mode turns on automatically for `package*`, `create*`, `notarize*` and
-`nativeImageCompile` tasks. Force it with `-Pproduction=true|false`.
-
-| Area        | Development            | Production                                                                                                               |
-| ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Rust lib    | fast `debug` profile   | `release` with LTO and stripping (31 MB → 1.8 MB)                                                                        |
-| Desktop app | hot-reloadable JVM app | size-optimized (`-Os`) GraalVM native image                                                                              |
-| Native libs | all                    | host OS/CPU only; Skia loaded from `lib/`; on Linux ~10 KB `libjvm.so`/`libjava.so` shims instead of the JDK's 28 MB one |
-
-Android picks the Rust profile from its build type.
-
-### 6. Releases
-
-Run [`spotube-release-binary.yml`](.github/workflows/spotube-release-binary.yml) manually
-(`workflow_dispatch`) as `stable`, `beta` or `nightly`.
-
-- **Beta:** the stable build as a draft, tagged `v<version>-beta.N`. Set `betaNumber` in
-  `composeApp/build.gradle.kts` to N, and back to `null` for stable.
-- **Desktop:** each platform (Linux x86_64 and aarch64, Windows, macOS) builds its installers on its
-  own runner.
-- **Android:** a signed APK.
-
-</details>
-<hr/>
-
-## 📚 Resources
-
-**Core stack**
-- [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
-- [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
-- [Compose Hot Reload](https://github.com/JetBrains/compose-hot-reload)
-- [Koin for KMP](https://insert-koin.io/docs/reference/koin-mp/kmp)
-- [Ktor client](https://ktor.io/docs/client-create-multiplatform-application.html)
-- [DataStore for KMP](https://developer.android.com/kotlin/multiplatform/datastore)
-
-**Desktop and native**
-- [Nucleus](https://github.com/kdroidFilter/Nucleus): desktop packaging and GraalVM integration
-- [ComposeNativeWebview](https://github.com/kdroidFilter/ComposeNativeWebview)
-- [GraalVM Native Image](https://www.graalvm.org/latest/reference-manual/native-image/) and its
-  [reachability metadata](https://www.graalvm.org/latest/reference-manual/native-image/metadata/)
-- [Gobley](https://gobley.dev): Rust in Kotlin Multiplatform
-- [vlcj](https://github.com/caprica/vlcj): VLC bindings for audio playback
-
-**Plugins**
-- [Zipline](https://github.com/cashapp/zipline): runs the JS plugins
-
-## 👥 The Spotube team
-
-- [Kingkor Roy Tirtho](https://github.com/team-spotube) - The Founder, Maintainer and Lead Developer
-- [Owen Connor](https://github.com/owencz1998) - The Cool Discord Moderator
-- [Piotr Rogowski](https://github.com/karniv00l) - The MacOS Developer
-- [Rusty Apple](https://github.com/RustyApple) - The Mysterious Unknown Guy
-
-## 💼 License
-
-Spotube is open source and licensed under the [AGPL-3.0-or-later](/LICENSE) License.
-
-<div align="center"><h4>© Copyright Spotube 2026</h4></div>
+Hodai is open source under the [AGPL-3.0-or-later](LICENSE) license.

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter
+enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <!-- == PACKAGE SPECIFIC SECTION == -->
+    <id>hodai</id>
+    <version>{{version}}</version>
+    <packageSourceUrl>https://github.com/andikachr/hodai/tree/master/packaging/chocolatey</packageSourceUrl>
+    <owners>Hodai</owners>
+    <!-- ============================== -->
+
+    <!-- == SOFTWARE SPECIFIC SECTION == -->
+    <title>Hodai (Install)</title>
+    <authors>Hodai</authors>
+    <projectUrl>https://github.com/andikachr/hodai</projectUrl>
+    <iconUrl>
+      https://raw.githubusercontent.com/andikachr/hodai/master/assets/branding/hodai-logo.png</iconUrl>
+    <copyright>2026 Kingkor Roy Tirtho and Spotube Contributors</copyright>
+    <!-- If there is a license Url available, it is required for the community feed -->
+    <licenseUrl>https://github.com/andikachr/hodai/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/andikachr/hodai</projectSourceUrl>
+    <docsUrl>https://github.com/andikachr/hodai</docsUrl>
+    <bugTrackerUrl>https://github.com/andikachr/hodai/issues/new</bugTrackerUrl>
+    <tags>hodai music audio music-player streaming lyrics plugins foss</tags>
+    <summary>Free, open source music player. No account needed</summary>
+    <description>
+      Hodai is a free music player for Windows, macOS, Linux, and Android. Open it, search, and
+      press play. The music source is already configured, and there is no account to create.
+
+      # Features
+      - Search and play songs, albums, and playlists right away
+      - Synced lyrics that follow the song
+      - Downloads for offline listening, with their tags
+      - Group listening rooms
+      - Plugin support for other music sources
+      - No ads, no telemetry, no user data collection
+      - Open source, licensed under AGPL-3.0
+    </description>
+    <releaseNotes>{{release.url}}
+
+{{release.notes}}</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

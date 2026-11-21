@@ -1,14 +1,12 @@
-Open source music client that doesn't require Premium nor uses Electron! Available for both desktop & mobile!
-
+Hodai is a free, open source music player for desktop and mobile. Open it, search for a song, and press play. There is no account to create and nothing to configure first: the music source is set up already, using public and free music metadata providers and the YouTube Music API.
 
 Features:
-* No ads, thanks to the use of public & free music metadata providers and YT Music APIs¹
-* Downloadable tracks
-* Cross-platform support
-* Small size & less data usage
-* Anonymous/guest login
-* Time synced lyrics
-* No telemetry, diagnostics or user data collection
-* Native performance
-* Open source/libre software
-* Playback control is done locally, not on the server
+* Synced lyrics that follow the song
+* Downloadable tracks for offline listening
+* Cross-platform: Android, Windows, macOS, and Linux
+* Group listening rooms
+* No ads
+* No telemetry, diagnostics, or user data collection
+* Playback runs locally on your device
+* Plugin support for other music sources
+* Open source, licensed under AGPL-3.0

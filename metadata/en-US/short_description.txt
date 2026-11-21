@@ -1,1 +1,1 @@
-Lightweight & resource friendly music client
+Free music player. No account needed, ready to play right away.

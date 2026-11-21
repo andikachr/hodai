@@ -1,0 +1,28 @@
+cask "hodai" do
+  version "{{version}}"
+  sha256 "{{artifacts.macosArm64.sha256}}"
+
+  url "{{repositoryUrl}}/releases/download/v#{version}/Hodai-macos-apple-silicon.dmg",
+      verified: "github.com/andikachr/hodai/"
+  name "Hodai"
+  desc "Free, open source music player. No account needed"
+  homepage "https://github.com/andikachr/hodai"
+
+  livecheck do
+    url :url
+    strategy :github_latest
+  end
+
+  # Intel macs aren't supported: GraalVM native-image can't cross-compile the DMG
+  depends_on arch: :arm64
+
+  app "Hodai.app"
+
+  zap trash: [
+    "~/Library/Application Support/Hodai",
+    "~/Library/Caches/Hodai",
+    "~/Library/Preferences/id.hodai.app.plist",
+    "~/Library/Saved Application State/id.hodai.app.savedState",
+    "~/Library/WebKit/id.hodai.app",
+  ]
+end

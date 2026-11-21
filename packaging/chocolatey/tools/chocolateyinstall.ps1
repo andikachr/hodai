@@ -1,14 +1,14 @@
 ﻿$ErrorActionPreference = 'Stop'; # stop on all errors
 
 $toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$fileLocation = Join-Path $toolsDir 'Spotube-windows-x86_64-setup.exe'
+$fileLocation = Join-Path $toolsDir 'Hodai-windows-x86_64-setup.exe'
 
 $packageArgs = @{
   packageName   = $env:ChocolateyPackageName
   fileType      = 'exe'
   file          = $fileLocation
 
-  softwareName  = 'Spotube*'
+  softwareName  = 'Hodai*'
   silentArgs    = '/S' # NSIS (electron-builder one-click, per-user)
   validExitCodes= @(0)
 }

@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Hodai.Hodai
+PackageVersion: {{version}}
+PackageLocale: en-US
+Publisher: Hodai
+PublisherUrl: https://github.com/andikachr
+PublisherSupportUrl: https://github.com/andikachr/hodai/issues
+PrivacyUrl: https://github.com/andikachr/hodai/blob/master/PRIVACY_POLICY.md
+Author: Hodai
+PackageName: Hodai
+PackageUrl: https://github.com/andikachr/hodai
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/andikachr/hodai/blob/master/LICENSE
+Copyright: Copyright (c) 2022-2026 Kingkor Roy Tirtho and Spotube Contributors
+ShortDescription: Free, open source music player. No account needed
+Description: |-
+  Hodai is a free music player for Windows, macOS, Linux, and Android. Open it, search, and
+  press play. The music source is already configured, and there is no account to create.
+Moniker: hodai
+Tags:
+- audio
+- music
+- music-player
+- streaming
+- lyrics
+- plugins
+{{#release.notes}}
+ReleaseNotes: |-
+{{#indent2}}{{release.notes}}{{/indent2}}
+{{/release.notes}}
+ReleaseNotesUrl: {{release.url}}
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

@@ -118,6 +118,67 @@ fun appColorsFrom(m: MillenniumColors): AppColors = AppColors(
     scrim = m.scrim
 )
 
+
+/**
+ * Hodai brand palette, locked by the owner on 2026-11-22: deep green #183630,
+ * bone cream #E3DAC9, soft gold #E5C690. Applied over the Millennium semantic
+ * roles so every screen that reads AppTheme.colors wears the brand colours,
+ * while library components keep the Lime accent family.
+ */
+private fun AppColors.withHodaiPalette(dark: Boolean): AppColors = if (dark) {
+    copy(
+        primary = Color(0xFFE5C690),
+        onPrimary = Color(0xFF14332A),
+        primaryContainer = Color(0xFF1F443B),
+        onPrimaryContainer = Color(0xFFE3DAC9),
+        secondary = Color(0xFFE5C690),
+        onSecondary = Color(0xFF14332A),
+        secondaryContainer = Color(0xFF1F443B),
+        onSecondaryContainer = Color(0xFFE3DAC9),
+        tertiaryContainer = Color(0xFF1F443B),
+        onTertiaryContainer = Color(0xFFE3DAC9),
+        background = Color(0xFF183630),
+        onBackground = Color(0xFFE3DAC9),
+        surface = Color(0xFF183630),
+        onSurface = Color(0xFFE3DAC9),
+        surfaceVariant = Color(0xFF122A21),
+        onSurfaceVariant = Color(0xFF93AC9E),
+        surfaceContainer = Color(0xFF183630),
+        surfaceContainerHigh = Color(0xFF1F443B),
+        surfaceContainerHighest = Color(0xFF26503F),
+        inverseSurface = Color(0xFFE3DAC9),
+        inverseOnSurface = Color(0xFF183630),
+        outline = Color(0xFF2A5546),
+        outlineVariant = Color(0xFF2A5546)
+    )
+} else {
+    copy(
+        primary = Color(0xFFE5C690),
+        onPrimary = Color(0xFF14332A),
+        primaryContainer = Color(0xFFEFE9DC),
+        onPrimaryContainer = Color(0xFF183630),
+        secondary = Color(0xFFE5C690),
+        onSecondary = Color(0xFF14332A),
+        secondaryContainer = Color(0xFFEFE9DC),
+        onSecondaryContainer = Color(0xFF183630),
+        tertiaryContainer = Color(0xFFEFE9DC),
+        onTertiaryContainer = Color(0xFF183630),
+        background = Color(0xFFE3DAC9),
+        onBackground = Color(0xFF183630),
+        surface = Color(0xFFE3DAC9),
+        onSurface = Color(0xFF183630),
+        surfaceVariant = Color(0xFFD8CDB6),
+        onSurfaceVariant = Color(0xFF5F7A6E),
+        surfaceContainer = Color(0xFFE3DAC9),
+        surfaceContainerHigh = Color(0xFFEFE9DC),
+        surfaceContainerHighest = Color(0xFFF7F3E8),
+        inverseSurface = Color(0xFF183630),
+        inverseOnSurface = Color(0xFFE3DAC9),
+        outline = Color(0xFFB4A888),
+        outlineVariant = Color(0xFFB4A888)
+    )
+}
+
 /** Named text styles used by the app, independent of Material typography. */
 @Immutable
 data class AppTypography(
@@ -233,7 +294,7 @@ fun SpotubeTheme(
             )
         )
     ) {
-        val colors = appColorsFrom(MillenniumTheme.colors)
+        val colors = appColorsFrom(MillenniumTheme.colors).withHodaiPalette(isDarkTheme)
         MillenniumTooltipHost {
             CompositionLocalProvider(
                 LocalAppColors provides colors,

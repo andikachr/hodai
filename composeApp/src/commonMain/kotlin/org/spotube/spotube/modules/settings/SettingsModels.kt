@@ -39,7 +39,7 @@ data class UserSettings(
 
     // Appearance
     val theme: Theme = Theme.SYSTEM,
-    val palette: MillenniumPalette = MillenniumPalette.Blue,
+    val palette: MillenniumPalette = MillenniumPalette.Lime,
 
     // Playback
     val streamingMusicFormat: AudioFormat = defaultStreamingMusicFormat(),

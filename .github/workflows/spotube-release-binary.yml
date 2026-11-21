@@ -249,13 +249,13 @@ jobs:
       - name: Rename APK
         run: |
           APK_FILE=$(find composeApp/build/outputs/apk -path "*elease*" -name "*.apk" -type f | head -1)
-          cp "$APK_FILE" Spotube-android-all-arch.apk
+          cp "$APK_FILE" Hodai-android-all-arch.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
           name: android-apk
-          path: Spotube-android-all-arch.apk
+          path: Hodai-android-all-arch.apk
 
       - name: Setup tmate session on failure
         if: ${{ inputs.debug_ssh && failure() }}
@@ -336,7 +336,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: linux-tarball
-          path: spotube-linux-*-x86_64.tar.xz
+          path: Hodai-linux-*-x86_64.tar.xz
 
       # Only the AppImage bundles VLC, GTK and WebKitGTK; deb/rpm depend on the distro packages
       - name: Package Linux AppImage
@@ -348,28 +348,28 @@ jobs:
         run: |
           DEB_FILE=$(find composeApp/build/compose/binaries/main/graalvm-deb -maxdepth 1 -name "*.deb" -type f | head -1)
           RPM_FILE=$(find composeApp/build/compose/binaries/main/graalvm-rpm -maxdepth 1 -name "*.rpm" -type f | head -1)
-          cp "$DEB_FILE" Spotube-linux-x86_64.deb
-          cp "$RPM_FILE" Spotube-linux-x86_64.rpm
+          cp "$DEB_FILE" Hodai-linux-x86_64.deb
+          cp "$RPM_FILE" Hodai-linux-x86_64.rpm
           APPIMAGE_FILE=$(find composeApp/build/compose/binaries/main -name "*.AppImage" -type f | head -1)
-          cp "$APPIMAGE_FILE" Spotube-linux-x86_64.AppImage
+          cp "$APPIMAGE_FILE" Hodai-linux-x86_64.AppImage
 
       - name: Upload DEB
         uses: actions/upload-artifact@v7
         with:
           name: linux-deb
-          path: Spotube-linux-x86_64.deb
+          path: Hodai-linux-x86_64.deb
 
       - name: Upload RPM
         uses: actions/upload-artifact@v7
         with:
           name: linux-rpm
-          path: Spotube-linux-x86_64.rpm
+          path: Hodai-linux-x86_64.rpm
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v7
         with:
           name: linux-appimage
-          path: Spotube-linux-x86_64.AppImage
+          path: Hodai-linux-x86_64.AppImage
 
       - name: Setup tmate session on failure
         if: ${{ inputs.debug_ssh && failure() }}
@@ -457,7 +457,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: linux-tarball-arm64
-          path: spotube-linux-*-aarch64.tar.xz
+          path: Hodai-linux-*-aarch64.tar.xz
 
       # Only the AppImage bundles VLC, GTK and WebKitGTK; deb/rpm depend on the distro packages
       - name: Package Linux AppImage
@@ -469,28 +469,28 @@ jobs:
         run: |
           DEB_FILE=$(find composeApp/build/compose/binaries/main/graalvm-deb -maxdepth 1 -name "*.deb" -type f | head -1)
           RPM_FILE=$(find composeApp/build/compose/binaries/main/graalvm-rpm -maxdepth 1 -name "*.rpm" -type f | head -1)
-          cp "$DEB_FILE" Spotube-linux-aarch64.deb
-          cp "$RPM_FILE" Spotube-linux-aarch64.rpm
+          cp "$DEB_FILE" Hodai-linux-aarch64.deb
+          cp "$RPM_FILE" Hodai-linux-aarch64.rpm
           APPIMAGE_FILE=$(find composeApp/build/compose/binaries/main -name "*.AppImage" -type f | head -1)
-          cp "$APPIMAGE_FILE" Spotube-linux-aarch64.AppImage
+          cp "$APPIMAGE_FILE" Hodai-linux-aarch64.AppImage
 
       - name: Upload DEB
         uses: actions/upload-artifact@v7
         with:
           name: linux-deb-arm64
-          path: Spotube-linux-aarch64.deb
+          path: Hodai-linux-aarch64.deb
 
       - name: Upload RPM
         uses: actions/upload-artifact@v7
         with:
           name: linux-rpm-arm64
-          path: Spotube-linux-aarch64.rpm
+          path: Hodai-linux-aarch64.rpm
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v7
         with:
           name: linux-appimage-arm64
-          path: Spotube-linux-aarch64.AppImage
+          path: Hodai-linux-aarch64.AppImage
 
       - name: Setup tmate session on failure
         if: ${{ inputs.debug_ssh && failure() }}
@@ -548,13 +548,13 @@ jobs:
           # Top level only: subfolders hold the unpacked app, and __* are electron-builder helpers
           $EXE_FILE = Get-ChildItem -Path composeApp/build/compose/binaries/main/graalvm-exe -Filter "*.exe" |
             Where-Object { $_.Name -notlike '__*' } | Select-Object -First 1
-          Copy-Item $EXE_FILE.FullName Spotube-windows-x86_64-setup.exe
+          Copy-Item $EXE_FILE.FullName Hodai-windows-x86_64-setup.exe
 
       - name: Upload EXE
         uses: actions/upload-artifact@v7
         with:
           name: windows-exe
-          path: Spotube-windows-x86_64-setup.exe
+          path: Hodai-windows-x86_64-setup.exe
 
       - name: Setup tmate session on failure
         if: ${{ inputs.debug_ssh && failure() }}
@@ -618,13 +618,13 @@ jobs:
       - name: Rename macOS artifact
         run: |
           DMG_FILE=$(find composeApp/build/compose/binaries/main/graalvm-dmg -maxdepth 1 -name "*.dmg" -type f | head -1)
-          cp "$DMG_FILE" Spotube-macos-apple-silicon.dmg
+          cp "$DMG_FILE" Hodai-macos-apple-silicon.dmg
 
       - name: Upload DMG
         uses: actions/upload-artifact@v7
         with:
           name: macos-dmg
-          path: Spotube-macos-apple-silicon.dmg
+          path: Hodai-macos-apple-silicon.dmg
 
       - name: Setup tmate session on failure
         if: ${{ inputs.debug_ssh && failure() }}
@@ -700,13 +700,13 @@ jobs:
           APP=$(find build/ios/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" -type d | head -1)
           mkdir Payload
           cp -R "$APP" Payload/
-          zip -qry Spotube-ios.ipa Payload
+          zip -qry Hodai-ios.ipa Payload
 
       - name: Upload IPA
         uses: actions/upload-artifact@v7
         with:
           name: ios-ipa
-          path: Spotube-ios.ipa
+          path: Hodai-ios.ipa
 
       - name: Setup tmate session on failure
         if: ${{ inputs.debug_ssh && failure() }}
@@ -758,7 +758,7 @@ jobs:
             TAG="v${VERSION}"
             echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
             echo "is_draft=true" >> "$GITHUB_OUTPUT"
-            echo "release_name=Spotube ${TAG}" >> "$GITHUB_OUTPUT"
+            echo "release_name=Hodai ${TAG}" >> "$GITHUB_OUTPUT"
           else
             TAG="nightly"
             VERSION="$(date +%Y-%m-%d)-${{ github.run_number }}"

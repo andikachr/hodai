@@ -100,7 +100,7 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
         // Short-lived placeholder until Media3 posts the playback notification. No localized text:
         // loading it here would block the main thread (see createNotificationChannel).
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Spotube")
+            .setContentTitle("Hodai")
             .setSmallIcon(R.drawable.ic_stat_spotube)
             .setContentIntent(sessionActivity)
             .setOngoing(true)
@@ -146,7 +146,7 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
                 setShowBadge(false)
             }
 
-        manager.createNotificationChannel(channel("Spotube"))
+        manager.createNotificationChannel(channel("Hodai"))
         serviceScope.launch {
             // Re-creating a channel with the same ID updates its name and description.
             manager.createNotificationChannel(

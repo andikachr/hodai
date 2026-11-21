@@ -52,6 +52,7 @@ import org.spotube.spotube.modules.shell.AppShell
 import org.spotube.spotube.modules.support.LocalSupportPrompt
 import org.spotube.spotube.modules.support.SupportDialog
 import org.spotube.spotube.modules.support.SupportReminderIntervalMillis
+import org.spotube.spotube.modules.support.donationOptions
 import org.spotube.spotube.modules.update.AppUpdateDialog
 import org.spotube.spotube.modules.update.AppUpdateService
 import org.spotube.spotube.modules.plugin.components.PluginPermissionDialog
@@ -175,6 +176,8 @@ fun App(
     // the prompt never appears right after the onboarding donation page.
     LaunchedEffect(showOnboarding) {
         if (showOnboarding) return@LaunchedEffect
+        // Hodai ships without donation destinations; never show an empty support prompt.
+        if (donationOptions.isEmpty()) return@LaunchedEffect
         // Read the persisted value rather than the collected state, whose initial value is the
         // default (0) until DataStore has emitted once.
         val current = settingsRepository.getCurrentSettings()

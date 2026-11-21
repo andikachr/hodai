@@ -152,7 +152,7 @@ internal fun PluginCard(
     }
 }
 
-/** What the plugin does, in its ability colors, then who made it: "Audio · Spotube Team". */
+/** What the plugin does, in its ability colors, then who made it: "Audio · Hodai". */
 @Composable
 private fun PluginRowMeta(item: PluginListItem) {
     val plugin = item.plugin

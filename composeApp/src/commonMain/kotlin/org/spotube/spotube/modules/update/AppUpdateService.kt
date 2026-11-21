@@ -72,7 +72,7 @@ class AppUpdateService(
 
             val releases = httpClient.get(AppBuildInfo.RELEASES_API_URL) {
                 header(HttpHeaders.Accept, "application/vnd.github+json")
-                header(HttpHeaders.UserAgent, "Spotube/${AppBuildInfo.VERSION}")
+                header(HttpHeaders.UserAgent, "Hodai/${AppBuildInfo.VERSION}")
             }.body<List<GitHubRelease>>()
 
             val release = AppReleaseSelector.select(currentVersion, releases, settings.ignoredAppUpdateVersion)

@@ -86,6 +86,7 @@ import org.spotube.spotube.resources.iconsax.IconsaxMirroringScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import spotube.composeapp.generated.resources.Res
+import spotube.composeapp.generated.resources.welcome_app_name
 import spotube.composeapp.generated.resources.support_button_label
 import spotube.composeapp.generated.resources.devices_title
 import spotube.composeapp.generated.resources.home_title_browse
@@ -143,7 +144,7 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
             title = {
                 if (isSmallScreen) {
                     Text(
-                        "Spotube",
+                        stringResource(Res.string.welcome_app_name),
                         style = AppTheme.typography.headlineLarge.copy(
                             fontFamily = FontFamily(
                                 listOf(Font(Res.font.cookie_regular, weight = FontWeight.Normal))

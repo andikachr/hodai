@@ -30,7 +30,7 @@ class RealCoreAPI : CoreAPI {
     }
 
     override fun supportMarkdownText(currentVersion: SemVer): String {
-        return "Keep supporting Spotube!"
+        return "Keep supporting Hodai!"
     }
 
     override val requiresAuthentication = false

@@ -67,26 +67,8 @@ data class DonationOption(
     val url: String,
     val icon: ImageVector)
 
-/** The donation destinations shown in onboarding, settings and the support prompt. */
-val donationOptions: List<DonationOption> = listOf(
-    DonationOption(
-        id = "patreon",
-        title = Res.string.welcome_donate_patreon_title,
-        subtitle = Res.string.welcome_donate_patreon_subtitle,
-        url = "https://patreon.com/krtirtho",
-        icon = Iconsax.BrandPatreon),
-    DonationOption(
-        id = "buymeacoffee",
-        title = Res.string.welcome_donate_bmac_title,
-        subtitle = Res.string.welcome_donate_bmac_subtitle,
-        url = "https://www.buymeacoffee.com/krtirtho",
-        icon = Iconsax.BrandBuyMeACoffee),
-    DonationOption(
-        id = "opencollective",
-        title = Res.string.welcome_donate_opencollective_title,
-        subtitle = Res.string.welcome_donate_opencollective_subtitle,
-        url = "https://opencollective.com/spotube",
-        icon = Iconsax.BrandOpencollective))
+/** The donation destinations shown in onboarding, settings and the support prompt. Hodai ships without upstream donation links. */
+val donationOptions: List<DonationOption> = emptyList()
 
 /** Minimum time between two automatic support reminders. */
 const val SupportReminderIntervalMillis: Long = 7L * 24 * 60 * 60 * 1000

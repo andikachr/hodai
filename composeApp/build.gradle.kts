@@ -155,7 +155,9 @@ val isLinuxHost = System.getProperty("os.name").lowercase().contains("linux")
 val bundleForAppImage = isLinuxHost && providers.gradleProperty("appImage").map { it.toBoolean() }.getOrElse(false)
 
 vlcjBundler {
-    packageName = "$bundleId.core.generated"   // choose a different package
+    // Pinned to upstream's package: AudioPlayer.jvm.kt imports org.spotube.spotube.core.generated,
+    // and deriving this from bundleId breaks compilation now that bundleId is id.hodai.app.
+    packageName = "org.spotube.spotube.core.generated"
     objectName = "VLCBundleLoaderGenerated"               // or rename the object
     bundleVlc = !isLinuxHost || bundleForAppImage
 }

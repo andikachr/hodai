@@ -63,6 +63,7 @@ import org.spotube.spotube.modules.welcome.WelcomeRepository
 import org.spotube.spotube.resources.iconsax.Iconsax
 import org.spotube.spotube.resources.iconsax.IconsaxCd
 import org.spotube.spotube.resources.iconsax.IconsaxDirectboxReceive
+import org.spotube.spotube.resources.iconsax.IconsaxHeart
 import org.spotube.spotube.resources.iconsax.IconsaxHome
 import org.spotube.spotube.resources.iconsax.IconsaxMirrorScreenRegular
 import org.spotube.spotube.resources.iconsax.IconsaxMusicDashboard
@@ -86,8 +87,10 @@ import spotube.composeapp.generated.resources.library_tab_local_tracks
 import spotube.composeapp.generated.resources.library_tab_playlists
 import spotube.composeapp.generated.resources.library_toolbar_compact_title
 import spotube.composeapp.generated.resources.nav_devices
-import spotube.composeapp.generated.resources.nav_group_connect
-import spotube.composeapp.generated.resources.nav_group_on_device
+import spotube.composeapp.generated.resources.nav_favorites
+import spotube.composeapp.generated.resources.nav_group_connection
+import spotube.composeapp.generated.resources.nav_group_explore
+import spotube.composeapp.generated.resources.nav_group_your_music
 import spotube.composeapp.generated.resources.nav_home
 import spotube.composeapp.generated.resources.nav_search
 import spotube.composeapp.generated.resources.settings_screen_title
@@ -108,42 +111,48 @@ private val tabs = listOf<NavigationItem>(
     NavigationItem.Tab<Any>(Res.string.nav_search, Iconsax.IconsaxSearch, Routes.Search)
 )
 
-val sidebarTabs = tabs + listOf(
+// Hodai sidebar layout (owner-locked mock, Fase 3): Explore / Your Music /
+// Connection. Only items with a real route are listed; Search stays in Explore
+// because it is the only desktop entry point to the search screen.
+val sidebarTabs = listOf<NavigationItem>(
     NavigationItem.Group(
-        Res.string.library_toolbar_compact_title,
+        Res.string.nav_group_explore,
         items = listOf(
-            NavigationItem.Tab(
+            NavigationItem.Tab<Any>(Res.string.nav_home, Iconsax.IconsaxHome, Routes.Home),
+            NavigationItem.Tab<Any>(Res.string.nav_search, Iconsax.IconsaxSearch, Routes.Search)
+        )
+    ),
+    NavigationItem.Group(
+        Res.string.nav_group_your_music,
+        items = listOf(
+            NavigationItem.Tab<Any>(Res.string.nav_favorites, Iconsax.IconsaxHeart, Routes.SavedTracks),
+            NavigationItem.Tab<Any>(
                 Res.string.library_tab_playlists,
                 Iconsax.IconsaxMusicDashboard,
                 Routes.Library,
                 LibraryTab.Playlists
             ),
-            NavigationItem.Tab(Res.string.library_tab_albums, Iconsax.IconsaxCd, Routes.Library, LibraryTab.Albums),
-            NavigationItem.Tab(Res.string.library_tab_artists, Iconsax.User, Routes.Library, LibraryTab.Artists)
-        )
-    ),
-    NavigationItem.Group(
-        Res.string.nav_group_on_device,
-        items = listOf(
-            NavigationItem.Tab(
-                Res.string.library_tab_local_tracks,
-                Iconsax.IconsaxMusicLibrary,
-                Routes.Library,
-                LibraryTab.LocalTracks
-            ),
-            NavigationItem.Tab(
+            NavigationItem.Tab<Any>(Res.string.library_tab_albums, Iconsax.IconsaxCd, Routes.Library, LibraryTab.Albums),
+            NavigationItem.Tab<Any>(Res.string.library_tab_artists, Iconsax.User, Routes.Library, LibraryTab.Artists),
+            NavigationItem.Tab<Any>(
                 Res.string.library_tab_downloads,
                 Iconsax.IconsaxDirectboxReceive,
                 Routes.Library,
                 LibraryTab.Downloads
+            ),
+            NavigationItem.Tab<Any>(
+                Res.string.library_tab_local_tracks,
+                Iconsax.IconsaxMusicLibrary,
+                Routes.Library,
+                LibraryTab.LocalTracks
             )
         )
     ),
     NavigationItem.Group(
-        Res.string.nav_group_connect,
+        Res.string.nav_group_connection,
         items = listOf(
-            NavigationItem.Tab(Res.string.nav_devices, Iconsax.IconsaxMirrorScreenRegular, Routes.Devices),
-            NavigationItem.Tab(Res.string.jam_screen_title, Iconsax.IconsaxSoundTwotone, Routes.Jam)
+            NavigationItem.Tab<Any>(Res.string.nav_devices, Iconsax.IconsaxMirrorScreenRegular, Routes.Devices),
+            NavigationItem.Tab<Any>(Res.string.jam_screen_title, Iconsax.IconsaxSoundTwotone, Routes.Jam)
         )
     )
 )

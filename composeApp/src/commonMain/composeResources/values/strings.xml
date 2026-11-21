@@ -760,6 +760,8 @@
 
     <!-- Home -->
     <string name="home_title_browse">Browse</string>
+    <string name="home_popular">Popular</string>
+    <string name="home_popular_play">Play</string>
 
     <!-- Lyrics -->
     <string name="lyrics_mode_synced">Synced</string>
@@ -1086,6 +1088,10 @@
     <string name="nav_search">Search</string>
     <string name="nav_group_on_device">On Device</string>
     <string name="nav_group_connect">Connect</string>
+    <string name="nav_group_explore">Explore</string>
+    <string name="nav_group_your_music">Your Music</string>
+    <string name="nav_group_connection">Connection</string>
+    <string name="nav_favorites">Favorites</string>
     <string name="nav_devices">Devices</string>
     <plurals name="connect_jam_hosting">
         <item quantity="one">Hosting · %1$d listener</item>

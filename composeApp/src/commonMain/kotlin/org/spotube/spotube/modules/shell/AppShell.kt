@@ -65,6 +65,7 @@ import org.spotube.spotube.core.navigation.NavigationState
 import org.spotube.spotube.core.navigation.Navigator
 import org.spotube.spotube.core.navigation.Routes
 import org.spotube.spotube.core.remote.ConnectionRequestDialogHost
+import org.spotube.spotube.core.ui.theming.HodaiDarkRegion
 import org.spotube.spotube.core.remote.RemotePlaybackController
 import org.spotube.spotube.modules.devices.PlayDestinationPickerHost
 import org.spotube.spotube.modules.lyrics.LyricsScreen
@@ -158,10 +159,12 @@ fun AppShell(
                     )
                     Column(modifier = Modifier.fillMaxSize()) {
                         Row(modifier = Modifier.weight(1f)) {
-                            AppSidebar(
-                                navigator = navigator,
-                                navigationState = navigationState
-                            )
+                            HodaiDarkRegion {
+                                AppSidebar(
+                                    navigator = navigator,
+                                    navigationState = navigationState
+                                )
+                            }
                             MillenniumSeparator(
                                 modifier = Modifier.fillMaxHeight(),
                                 vertical = true
@@ -172,12 +175,14 @@ fun AppShell(
                                 content()
                             }
                         }
-                        AppLargePlayer(
-                            hazeState = hazeState,
-                            modifier = Modifier.fillMaxWidth(),
-                            onQueue = queueViewModel::toggleQueueVisibility,
-                            onAlternativeSource = alternativeViewModel::toggleAlternativeVisibility,
-                            onLyrics = { navigatorCommands.navigateTo(Routes.Lyrics) })
+                        HodaiDarkRegion {
+                            AppLargePlayer(
+                                hazeState = hazeState,
+                                modifier = Modifier.fillMaxWidth(),
+                                onQueue = queueViewModel::toggleQueueVisibility,
+                                onAlternativeSource = alternativeViewModel::toggleAlternativeVisibility,
+                                onLyrics = { navigatorCommands.navigateTo(Routes.Lyrics) })
+                        }
                     }
 
                     if (isQueueVisible) {

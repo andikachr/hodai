@@ -20,6 +20,7 @@ package org.spotube.spotube.modules.shell
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -50,7 +51,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.Text
@@ -68,7 +68,7 @@ import org.spotube.spotube.resources.iconsax.IconsaxSetting2
 import org.spotube.spotube.resources.iconsax.IconsaxSidebarLeftBroken
 import org.spotube.spotube.resources.iconsax.IconsaxSidebarRightBroken
 import org.spotube.spotube.sidebarTabs
-import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.spotube.millennium.composables.MillenniumIconButton
@@ -85,7 +85,7 @@ import org.spotube.millennium.composables.MillenniumSidebarMenu
 import org.spotube.millennium.composables.MillenniumSidebarTrigger
 import spotube.composeapp.generated.resources.Res
 import spotube.composeapp.generated.resources.welcome_app_name
-import spotube.composeapp.generated.resources.cookie_regular
+import spotube.composeapp.generated.resources.hodai_logo
 import spotube.composeapp.generated.resources.settings_screen_title
 import spotube.composeapp.generated.resources.support_button_label
 import spotube.composeapp.generated.resources.shell_sidebar_toggle_content_description
@@ -119,15 +119,23 @@ fun AppSidebar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AnimatedVisibility(visible = expanded, enter = fadeIn(), exit = fadeOut()) {
-                    Text(
-                        text = stringResource(Res.string.welcome_app_name),
-                        style = AppTheme.typography.headlineLarge.copy(
-                            fontFamily = FontFamily(
-                                listOf(Font(Res.font.cookie_regular, weight = FontWeight.Normal))
-                            )
-                        ),
-                        color = AppTheme.colors.onSurface
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.hodai_logo),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Text(
+                            text = stringResource(Res.string.welcome_app_name),
+                            style = AppTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = AppTheme.colors.onSurface
+                        )
+                    }
                 }
                 MillenniumSidebarTrigger {
                     MillenniumIconButton(

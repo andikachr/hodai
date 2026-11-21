@@ -572,6 +572,8 @@
 
     <!-- Home -->
     <string name="home_title_browse">Jelajahi</string>
+    <string name="home_popular">Popular</string>
+    <string name="home_popular_play">Putar</string>
 
     <!-- Lyrics -->
     <string name="lyrics_mode_synced">Tersinkron</string>
@@ -880,6 +882,10 @@
     <string name="nav_search">Cari</string>
     <string name="nav_group_on_device">Di Perangkat</string>
     <string name="nav_group_connect">Connect</string>
+    <string name="nav_group_explore">Jelajah</string>
+    <string name="nav_group_your_music">Musikmu</string>
+    <string name="nav_group_connection">Sambungan</string>
+    <string name="nav_favorites">Favorit</string>
     <string name="nav_devices">Perangkat</string>
 
     <!-- System tray (desktop) -->

@@ -37,15 +37,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 
 import org.spotube.spotube.core.ui.theming.AppTheme
+import org.spotube.spotube.core.ui.theming.HodaiDarkRegion
 import com.composeunstyled.Text
 import org.spotube.millennium.composables.MillenniumPullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,11 +71,13 @@ import org.spotube.spotube.core.ui.component.ErrorDisplay
 import org.spotube.spotube.core.ui.component.PlaylistCard
 import org.spotube.spotube.core.ui.component.TrackCard
 import org.spotube.spotube.core.ui.component.UserCard
-import org.spotube.spotube.core.ui.component.FeaturedCarousel
 import org.spotube.spotube.core.ui.component.VerticalScrollbar
+import org.spotube.spotube.core.ui.component.cards.FeaturedPhotoCard
 import org.spotube.spotube.core.ui.component.cards.PlayableCard
 import org.spotube.spotube.core.ui.component.dragScrollable
 import org.spotube.spotube.core.ui.misc.SkeletonTree
+import org.spotube.spotube.core.audioplayer.AudioPlayerQueue
+import org.spotube.spotube.core.audioplayer.QueueEntry
 import org.spotube.spotube.core.navigation.NavigationCommands
 import org.spotube.spotube.core.navigation.Routes
 import org.spotube.spotube.modules.shell.ConnectStatusBanner
@@ -93,6 +98,7 @@ import spotube.composeapp.generated.resources.home_title_browse
 import spotube.composeapp.generated.resources.jam_screen_title
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 import org.spotube.millennium.adaptive.WindowBreakpoints
 import org.spotube.spotube.resources.iconsax.IconsaxMirrorScreenRegular
@@ -299,7 +305,11 @@ private fun HomeContent(
             is HomeScreenState.Data -> {
                 if (state.featuredItems.isNotEmpty()) {
                     item {
-                        FeaturedCarousel(items = state.featuredItems)
+                        // The hero is a brand anchor like the sidebar and the
+                        // player: it keeps the dark tokens in light mode too.
+                        HodaiDarkRegion {
+                            PopularHero(items = state.featuredItems)
+                        }
                     }
                 }
 
@@ -344,12 +354,16 @@ private fun HomeContent(
                         }
                     }
                 } else {
-                    items(currentSections) { section ->
-                        HomeSection(
-                            title = section.title,
-                            subtitle = section.description,
-                            items = section.items
-                        )
+                    itemsIndexed(currentSections) { index, section ->
+                        if (index == 0) {
+                            HomeFeaturedSection(section = section)
+                        } else {
+                            HomeSection(
+                                title = section.title,
+                                subtitle = section.description,
+                                items = section.items
+                            )
+                        }
                     }
                 }
 
@@ -430,6 +444,112 @@ private fun HomeSection(
                     is MetadataBrowseItem.Playlist -> PlaylistCard(playlist = browseItem.data)
                     is MetadataBrowseItem.Track -> TrackCard(track = browseItem.data)
                     is MetadataBrowseItem.User -> UserCard(user = browseItem.data)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The first browse section under the hero uses the wide photo cards of the
+ * locked Hodai mock (artwork-filled card + caption chip); every later section
+ * keeps the standard [HomeSection] cards. Header rendering mirrors
+ * [HomeSection] so the two stay visually identical.
+ */
+@Composable
+private fun HomeFeaturedSection(
+    section: MetadataBrowseSection,
+    modifier: Modifier = Modifier
+) {
+    val navigationCommands = koinInject<NavigationCommands>()
+    val audioPlayerQueue = koinInject<AudioPlayerQueue>()
+    val scope = rememberCoroutineScope()
+    val rowState = rememberLazyListState()
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (!section.description.isNullOrEmpty()) Text(
+            text = section.description!!,
+            style = AppTheme.typography.labelMedium.copy(
+                color = AppTheme.colors.secondary,
+                fontWeight = FontWeight.Medium
+            ),
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Text(
+            text = section.title,
+            style = AppTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 16.dp).offset(y = (-12).dp)
+        )
+
+        LazyRow(
+            state = rowState,
+            modifier = Modifier.dragScrollable(rowState),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            items(section.items) { browseItem ->
+                when (browseItem) {
+                    is MetadataBrowseItem.Album -> FeaturedPhotoCard(
+                        title = browseItem.data.title,
+                        subtitle = browseItem.data.artists.joinToString { it.name },
+                        imageURL = browseItem.data.thumbnails.firstOrNull()?.url,
+                        onClick = {
+                            navigationCommands.navigateTo(Routes.Album(browseItem.data.id))
+                        }
+                    )
+
+                    is MetadataBrowseItem.Playlist -> FeaturedPhotoCard(
+                        title = browseItem.data.title,
+                        subtitle = browseItem.data.owner?.displayName
+                            ?: browseItem.data.owner?.username
+                            ?: browseItem.data.description,
+                        imageURL = browseItem.data.thumbnails.firstOrNull()?.url,
+                        onClick = {
+                            navigationCommands.navigateTo(Routes.Playlist(browseItem.data.id))
+                        }
+                    )
+
+                    is MetadataBrowseItem.Track -> FeaturedPhotoCard(
+                        title = browseItem.data.title,
+                        subtitle = browseItem.data.artists.joinToString { it.name },
+                        imageURL = (browseItem.data.album?.thumbnails
+                            ?: browseItem.data.thumbnails)?.firstOrNull()?.url,
+                        onClick = {
+                            scope.launch {
+                                audioPlayerQueue.load(
+                                    entries = listOf(
+                                        QueueEntry.StreamingTrack(
+                                            track = browseItem.data,
+                                            url = ""
+                                        )
+                                    ),
+                                    autoPlay = true,
+                                    startPosition = 0,
+                                    collectionEntry = null
+                                )
+                            }
+                        }
+                    )
+
+                    is MetadataBrowseItem.Artist -> FeaturedPhotoCard(
+                        title = browseItem.data.name,
+                        imageURL = browseItem.data.thumbnails.firstOrNull()?.url,
+                        onClick = {
+                            navigationCommands.navigateTo(Routes.Artist(browseItem.data.id))
+                        }
+                    )
+
+                    // User cards have no destination yet (see UserCard's TODO),
+                    // so the photo card stays non-interactive for them.
+                    is MetadataBrowseItem.User -> FeaturedPhotoCard(
+                        title = browseItem.data.displayName ?: browseItem.data.username,
+                        imageURL = browseItem.data.thumbnails.firstOrNull()?.url
+                    )
                 }
             }
         }

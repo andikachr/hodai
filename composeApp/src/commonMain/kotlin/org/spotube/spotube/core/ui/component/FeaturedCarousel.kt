@@ -287,13 +287,14 @@ private fun FeaturedCarouselCard(
 }
 
 @Composable
-private fun FeaturedPlayButton(
+internal fun FeaturedPlayButton(
     item: MetadataBrowseItem,
     audioPlayerQueue: AudioPlayerQueue,
     navigationCommands: NavigationCommands,
     remotePlaybackController: RemotePlaybackController = koinInject(),
     enabled: Boolean,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier,
+    contentColor: Color = Color.White) {
     val scope = rememberCoroutineScope()
     val currentCollectionEntry by audioPlayerQueue.currentCollectionEntryFlow.collectAsStateWithLifecycle()
     val busyCollections by remotePlaybackController.busyCollections.collectAsStateWithLifecycle()
@@ -324,12 +325,12 @@ private fun FeaturedPlayButton(
                     loading = CollectionPlaybackKey(
                         RemoteCollectionType.Album, item.data.id, PlaybackDestinationAction.Play
                     ) in busyCollections,
-                    foreground = Color.White
+                    foreground = contentColor
                 ) {
                     MillenniumIcon(
                         imageVector = if (isPlaying) Iconsax.IconsaxPause else Iconsax.IconsaxPlay,
                         contentDescription = null,
-                        tint = Color.White
+                        tint = contentColor
                     )
                 }
             }
@@ -360,12 +361,12 @@ private fun FeaturedPlayButton(
                     loading = CollectionPlaybackKey(
                         RemoteCollectionType.Playlist, item.data.id, PlaybackDestinationAction.Play
                     ) in busyCollections,
-                    foreground = Color.White
+                    foreground = contentColor
                 ) {
                     MillenniumIcon(
                         imageVector = if (isPlaying) Iconsax.IconsaxPause else Iconsax.IconsaxPlay,
                         contentDescription = null,
-                        tint = Color.White
+                        tint = contentColor
                     )
                 }
             }
@@ -398,7 +399,7 @@ private fun FeaturedPlayButton(
                     MillenniumIcon(
                         imageVector = if (isPlaying) Iconsax.IconsaxPause else Iconsax.IconsaxPlay,
                         contentDescription = null,
-                        tint = Color.White
+                        tint = contentColor
                     )
                 }
             }

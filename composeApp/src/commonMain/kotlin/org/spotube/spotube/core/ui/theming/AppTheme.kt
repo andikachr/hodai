@@ -340,6 +340,25 @@ fun SpotubeTheme(
     }
 }
 
+/**
+ * Forces the Hodai dark appearance for one region of the tree, whatever the
+ * app-wide appearance is. The sidebar and the large player are brand anchors:
+ * they stay deep green in light mode too (owner lock, 2026-11-22).
+ *
+ * The nested [MillenniumTheme] re-skins the library components in the region,
+ * but [LocalAppColors] does not follow a nested theme, so the dark app tokens
+ * are provided explicitly alongside it.
+ */
+@Composable
+fun HodaiDarkRegion(content: @Composable () -> Unit) {
+    MillenniumTheme(dark = true, config = MillenniumTheme.config) {
+        CompositionLocalProvider(
+            LocalAppColors provides appColorsFrom(MillenniumTheme.colors).withHodaiPalette(true),
+            content = content
+        )
+    }
+}
+
 /** Library default is 24dp padding + 16dp spacing, which is far too roomy on phones. */
 private fun compactModalBottomSheetTheme(): MillenniumModalBottomSheetTheme {
     val padding = PaddingValues(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp)

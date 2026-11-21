@@ -36,7 +36,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -76,7 +76,7 @@ import org.spotube.spotube.modules.saved_tracks.SavedTracksViewModel
 import org.spotube.spotube.resources.iconsax.Iconsax
 import org.spotube.spotube.resources.iconsax.Iconsax3DotsMore
 import org.spotube.spotube.resources.iconsax.IconsaxDirectboxReceive
-import org.spotube.spotube.resources.iconsax.IconsaxMusic
+import org.spotube.spotube.resources.iconsax.IconsaxMicrophone
 import org.spotube.spotube.resources.iconsax.IconsaxMusicFilter
 import org.spotube.spotube.resources.iconsax.IconsaxNext
 import org.spotube.spotube.resources.iconsax.IconsaxPause
@@ -223,9 +223,10 @@ fun AppLargePlayer(
         }
     }
 
-    // A translucent tint (not near-opaque) so the blurred art behind still reads through, and
-    // the material's watery caustics sit on top of it.
-    val surfaceTint = AppTheme.colors.surface.copy(alpha = 0.6f)
+    // Near-opaque tint: the player is a brand anchor that stays deep green in
+    // light mode too (it is composed inside HodaiDarkRegion), so only a whisper
+    // of the blurred art behind it reads through.
+    val surfaceTint = AppTheme.colors.surface.copy(alpha = 0.92f)
 
     Column(
         modifier = modifier
@@ -257,8 +258,8 @@ fun AppLargePlayer(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(52.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .size(44.dp)
+                            .clip(CircleShape)
                             .background(AppTheme.colors.surfaceContainerHighest)
                     ) {
                         AsyncImage(
@@ -430,7 +431,7 @@ fun AppLargePlayer(
                         MillenniumIconButton(
                             style = MillenniumIconButtonStyle.Quiet, onClick = onLyrics
                         ) {
-                            MillenniumIcon(Iconsax.IconsaxMusic, contentDescription = stringResource(Res.string.player_lyrics))
+                            MillenniumIcon(Iconsax.IconsaxMicrophone, contentDescription = stringResource(Res.string.player_lyrics))
                         }
                         val goToAlbumLabel = stringResource(Res.string.player_go_to_album)
                         val sleepTimerLabel = stringResource(Res.string.player_sleep_timer)

@@ -51,9 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.spotube.spotube.core.ui.component.ApplicationMainBar
 import org.spotube.spotube.modules.welcome.pages.BrandingPage
-import org.spotube.spotube.modules.welcome.pages.DonationPage
 import org.spotube.spotube.modules.welcome.pages.HowItWorksPage
-import org.spotube.spotube.modules.welcome.pages.PluginsPage
 import org.spotube.spotube.resources.iconsax.Iconsax
 import org.spotube.spotube.resources.iconsax.IconsaxCheckCircle
 import org.spotube.spotube.resources.iconsax.IconsaxNext
@@ -153,13 +151,6 @@ private fun WelcomeStepSwitcher(
         tabLabel = { labels[it] }) { index ->
         when (index) {
             0 -> BrandingPage(contentPadding = pagePadding)
-
-            1 -> DonationPage(
-                donations = state.donations,
-                onDonate = viewModel::openDonation,
-                contentPadding = pagePadding)
-
-            2 -> PluginsPage()
 
             else -> HowItWorksPage(contentPadding = pagePadding)
         }

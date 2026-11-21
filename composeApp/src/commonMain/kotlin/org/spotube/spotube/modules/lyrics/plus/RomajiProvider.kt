@@ -20,10 +20,10 @@ package org.spotube.spotube.modules.lyrics.plus
 /**
  * Supplies a romaji reading for each lyric line of a Japanese song.
  *
- * Lirik+ Paket 1 ships only this slot plus the UI layer that renders it; the
- * conversion engine (Japanese tokenizer) lands in Paket 2. Until then the
- * bound implementation is [UnavailableRomajiProvider], so the romaji layer
- * simply never appears.
+ * Lirik+ Paket 1 shipped this slot plus the UI layer that renders it; Paket 2
+ * adds the real conversion engine behind [createRomajiProvider]: Kuromoji on
+ * Android/desktop (androidJvmMain), [UnavailableRomajiProvider] on iOS until
+ * a native tokenizer is wired up there.
  */
 interface RomajiProvider {
 
@@ -34,7 +34,13 @@ interface RomajiProvider {
     suspend fun romajiFor(lines: List<String>, language: String): List<String>?
 }
 
-/** Placeholder bound until the real romaji engine (Paket 2) replaces it. */
+/** Fallback for platforms without a romaji engine; the layer never appears. */
 class UnavailableRomajiProvider : RomajiProvider {
     override suspend fun romajiFor(lines: List<String>, language: String): List<String>? = null
 }
+
+/**
+ * Creates the [RomajiProvider] for the current platform. Bound as the
+ * [RomajiProvider] singleton in the DI module.
+ */
+expect fun createRomajiProvider(): RomajiProvider

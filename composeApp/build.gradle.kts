@@ -317,6 +317,8 @@ kotlin {
             dependencies {
                 implementation(libs.newpipeextractor)
                 implementation(libs.ktor.client.okhttp)
+                // Lirik+ romaji engine (Japanese tokenizer); JVM/Android only
+                implementation(libs.kuromoji.ipadic)
             }
         }
         androidMain {

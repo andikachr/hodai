@@ -1327,6 +1327,9 @@
     "resources": [
         {
             "glob": "okhttp3/internal/publicsuffix/PublicSuffixDatabase.list"
+        },
+        {
+            "glob": "com/atilika/kuromoji/**"
         }
     ]
 }

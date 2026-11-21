@@ -74,7 +74,7 @@ import org.spotube.spotube.modules.lyrics.plus.LyricsPlusCache
 import org.spotube.spotube.modules.lyrics.plus.LyricsPlusRepository
 import org.spotube.spotube.modules.lyrics.plus.LyricsTranslator
 import org.spotube.spotube.modules.lyrics.plus.RomajiProvider
-import org.spotube.spotube.modules.lyrics.plus.UnavailableRomajiProvider
+import org.spotube.spotube.modules.lyrics.plus.createRomajiProvider
 import org.spotube.spotube.modules.playlist.AddTracksToPlaylistViewModel
 import org.spotube.spotube.modules.playlist.PlaylistRepository
 import org.spotube.spotube.modules.playlist.PlaylistViewModel
@@ -265,7 +265,7 @@ val sharedModules = module {
     singleOf(::FallbackLyricsSource)
     singleOf(::LyricsTranslator)
     singleOf(::LyricsPlusCache)
-    singleOf(::UnavailableRomajiProvider) { bind<RomajiProvider>() }
+    single<RomajiProvider> { createRomajiProvider() }
     singleOf(::LyricsPlusRepository)
     viewModelOf(::LyricsViewModel)
 

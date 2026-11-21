@@ -45,7 +45,7 @@ if [[ -d "$app_dir/plugins" || -d "$app_dir/usr" ]]; then
   exit 1
 fi
 
-name="spotube-linux-$version-$arch"
+name="hodai-linux-$version-$arch"
 staging="$(mktemp -d)"
 trap 'rm -rf "$staging"' EXIT
 dest="$staging/$name"

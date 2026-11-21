@@ -41,6 +41,7 @@ import org.spotube.millennium.composables.MillenniumTopAppBarTheme
 import org.spotube.millennium.composables.MillenniumTopAppBarThemeProperties
 import org.spotube.millennium.composables.defaultMillenniumModalBottomSheetTheme
 import org.spotube.millennium.composables.defaultMillenniumTopAppBarTheme
+import org.spotube.millennium.theme.MillenniumColorSchemes
 import org.spotube.millennium.theme.MillenniumColors
 import org.spotube.millennium.theme.MillenniumDarkThemeComponents
 import org.spotube.millennium.theme.MillenniumLightThemeComponents
@@ -120,10 +121,39 @@ fun appColorsFrom(m: MillenniumColors): AppColors = AppColors(
 
 
 /**
+ * Hodai brand colour sets for the Millennium library itself, locked by the
+ * owner on 2026-11-22: deep green #183630, bone cream #E3DAC9, soft gold
+ * #E5C690. These replace the Lime family in [MillenniumColorSchemes], so the
+ * library's own components (buttons, sliders, sidebar gel) wear the brand
+ * colours too, not just screens reading AppTheme.colors. The gold gel runs
+ * from #EFDBAC (top) to #C79F5D (bottom), matching the logo graduation.
+ */
+private val HodaiDarkColors = MillenniumColors(
+    background = Color(0xFF122A21), surface = Color(0xFF183630),
+    raised = Color(0xFF1F443B), inset = Color(0xFF0E241C),
+    text = Color(0xFFE3DAC9), muted = Color(0xFF93AC9E),
+    border = Color(0xFF2A5546), highlight = Color(0xFF3E7A63),
+    accent = Color(0xFFE5C690), accentTop = Color(0xFFEFDBAC),
+    accentBottom = Color(0xFFC79F5D), onAccent = Color(0xFF14332A),
+    success = Color(0xFF8FD0A8), danger = Color(0xFFFF98A9),
+    scrim = Color(0xB30A1F18)
+)
+
+private val HodaiLightColors = MillenniumColors(
+    background = Color(0xFFE3DAC9), surface = Color(0xFFEFE9DC),
+    raised = Color(0xFFF7F3E8), inset = Color(0xFFD8CDB6),
+    text = Color(0xFF183630), muted = Color(0xFF5F7A6E),
+    border = Color(0xFFB4A888), highlight = Color(0xFFFFFFFF),
+    accent = Color(0xFF8C6D1F), accentTop = Color(0xFFEFDBAC),
+    accentBottom = Color(0xFFC79F5D), onAccent = Color(0xFF14332A),
+    success = Color(0xFF257B51), danger = Color(0xFFB42332),
+    scrim = Color(0x66183630)
+)
+
+/**
  * Hodai brand palette, locked by the owner on 2026-11-22: deep green #183630,
  * bone cream #E3DAC9, soft gold #E5C690. Applied over the Millennium semantic
- * roles so every screen that reads AppTheme.colors wears the brand colours,
- * while library components keep the Lime accent family.
+ * roles so every screen that reads AppTheme.colors wears the brand colours.
  */
 private fun AppColors.withHodaiPalette(dark: Boolean): AppColors = if (dark) {
     copy(
@@ -276,6 +306,10 @@ fun SpotubeTheme(
         dark = isDarkTheme,
         config = MillenniumThemeConfig(
             palette = palette,
+            colorSchemes = MillenniumColorSchemes(
+                limeLight = HodaiLightColors,
+                limeDark = HodaiDarkColors
+            ),
             dark = darkTheme.copy(
                 topAppBarTheme = MillenniumTopAppBarTheme(
                     properties = darkTheme.topAppBarTheme.properties.copy(

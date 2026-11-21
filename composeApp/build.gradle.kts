@@ -46,7 +46,7 @@ plugins {
     kotlin("plugin.atomicfu") version libs.versions.kotlin
 }
 
-val bundleId = "org.spotube.spotube"
+val bundleId = "id.hodai.app"
 val version = "6.0.0"
 // Set to N to release <version>-beta.N (same app id, icons and name as stable); null for a plain stable release.
 // Installer metadata (packageVersion) must stay numeric, so it keeps using plain `version`.
@@ -71,9 +71,9 @@ val isProductionBuild = providers.gradleProperty("production").map { it.toBoolea
         }
     }
 )
-val targetName = "Spotube"
+val targetName = "Hodai"
 val homePageUrl = "https://spotube.cc"
-val repositoryUrl = "https://github.com/team-spotube/spotube"
+val repositoryUrl = "https://github.com/andikachr/hodai"
 val appVersionName = if (betaNumber != null) "$version-beta.$betaNumber" else version
 val appBuildNumber = if (isNightly) nightlyBuildNumber else buildNumber
 val appRepositoryUrl = repositoryUrl
@@ -105,10 +105,10 @@ listOf("linux", "aur", "flatpak", "winget", "chocolatey", "homebrew").forEach { 
         repositoryUrl.set(appRepositoryUrl)
         artifactNames.set(
             mapOf(
-                "linuxX86_64" to "spotube-linux-$packagingVersion-x86_64.tar.xz",
-                "linuxAarch64" to "spotube-linux-$packagingVersion-aarch64.tar.xz",
-                "windowsX64" to "Spotube-windows-x86_64-setup.exe",
-                "macosArm64" to "Spotube-macos-apple-silicon.dmg",
+                "linuxX86_64" to "hodai-linux-$packagingVersion-x86_64.tar.xz",
+                "linuxAarch64" to "hodai-linux-$packagingVersion-aarch64.tar.xz",
+                "windowsX64" to "Hodai-windows-x86_64-setup.exe",
+                "macosArm64" to "Hodai-macos-apple-silicon.dmg",
             )
         )
         artifactsDir.set(packagingArtifactsDir)
@@ -462,7 +462,7 @@ nucleus.application {
         packageName = bundleId
         // User-facing name (.app bundle, DMG productName, Launchpad/Dock); packageName above is the reverse-DNS id.
         // The GraalVM DMG task reads only appName ?: packageName, not macOS.packageName
-        appName = if (isNightly) "Spotube Nightly" else "Spotube"
+        appName = if (isNightly) "Hodai Nightly" else "Hodai"
         packageVersion = version
         licenseFile = project.file("../LICENSE")
 
@@ -486,7 +486,7 @@ nucleus.application {
         linux {
             iconFile.set(project.file("$desktopIconDir/icon.png"))
             modules("jdk.security.auth")
-            debMaintainer = "Team Spotube <team.spotube@proton.me>"
+            debMaintainer = "Hodai"
             rpmLicenseType = "AGPL-3.0-or-later"
             // deb/rpm use the distro's shared libraries (only the AppImage bundles VLC). VLC is not
             // bundled on Linux otherwise, the webview needs WebKitGTK 4.1, and the window/tray/MPRIS

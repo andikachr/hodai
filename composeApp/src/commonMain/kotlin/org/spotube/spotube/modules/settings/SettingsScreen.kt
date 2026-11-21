@@ -50,7 +50,7 @@ import org.spotube.spotube.modules.settings.sections.jamSection
 import org.spotube.spotube.modules.settings.sections.languageRegionSection
 import org.spotube.spotube.modules.settings.sections.playbackSection
 import org.spotube.spotube.modules.settings.sections.pluginsSection
-import org.spotube.spotube.modules.settings.sections.supportSection
+import org.spotube.spotube.modules.settings.sections.aboutSection
 import org.spotube.spotube.modules.settings.sections.updatesSection
 import org.spotube.spotube.modules.shell.LocalAppShellBottomInset
 import org.jetbrains.compose.resources.stringResource
@@ -127,8 +127,6 @@ private fun CompactSettingsContent(
                 .widthIn(max = 1280.dp)
                 .align(Alignment.TopCenter),
             contentPadding = contentPadding) {
-            pluginsSection(
-                navigatorCommands = navigatorCommands)
             if (settings != null) {
                 languageRegionSection(
                     settings = settings,
@@ -155,13 +153,15 @@ private fun CompactSettingsContent(
                         settings = settings,
                         settingsViewModel = settingsViewModel)
                 }
-                supportSection(
-                    settings = settings,
-                    settingsViewModel = settingsViewModel)
+                aboutSection()
                 updatesSection(
                     settings = settings,
                     settingsViewModel = settingsViewModel)
             }
+            // Plugins are an advanced topic: the entry lives at the very
+            // bottom instead of leading the settings list.
+            pluginsSection(
+                navigatorCommands = navigatorCommands)
         }
     }
 }

@@ -71,7 +71,7 @@ import org.spotube.spotube.modules.settings.sections.desktopSection
 import org.spotube.spotube.modules.settings.sections.downloadsSection
 import org.spotube.spotube.modules.settings.sections.languageRegionSection
 import org.spotube.spotube.modules.settings.sections.playbackSection
-import org.spotube.spotube.modules.settings.sections.supportSection
+import org.spotube.spotube.modules.settings.sections.aboutSection
 import org.spotube.spotube.modules.settings.sections.SettingsPageTitle
 import org.spotube.spotube.modules.settings.sections.updatesSection
 import org.spotube.spotube.modules.shell.LocalAppShellBottomInset
@@ -82,7 +82,6 @@ import org.spotube.spotube.resources.iconsax.IconsaxColorSwatch
 import org.spotube.spotube.resources.iconsax.IconsaxDirectboxReceive
 import org.spotube.spotube.resources.iconsax.IconsaxDocumentDownload
 import org.spotube.spotube.resources.iconsax.IconsaxForbidden
-import org.spotube.spotube.resources.iconsax.IconsaxHeart2
 import org.spotube.spotube.resources.iconsax.IconsaxImportArrow2
 import org.spotube.spotube.resources.iconsax.IconsaxInformation
 import org.spotube.spotube.resources.iconsax.IconsaxLanguageSquare
@@ -105,7 +104,6 @@ import spotube.composeapp.generated.resources.settings_section_jam
 import spotube.composeapp.generated.resources.settings_section_language_region
 import spotube.composeapp.generated.resources.settings_section_playback
 import spotube.composeapp.generated.resources.settings_section_plugins
-import spotube.composeapp.generated.resources.settings_section_support
 
 private val SettingsSidebarWidth = 236.dp
 
@@ -118,7 +116,6 @@ private val SettingsSidebarWidth = 236.dp
 internal enum class SettingsTab(
     val titleRes: StringResource,
     val icon: ImageVector) {
-    Plugins(Res.string.settings_section_plugins, Iconsax.IconsaxBoxAdd),
     LanguageRegion(Res.string.settings_section_language_region, Iconsax.IconsaxLanguageSquare),
     Appearance(Res.string.settings_section_appearance, Iconsax.IconsaxColorSwatch),
     Playback(Res.string.settings_section_playback, Iconsax.IconsaxMusicPlay),
@@ -127,8 +124,9 @@ internal enum class SettingsTab(
     Caching(Res.string.settings_section_caching, Iconsax.IconsaxDocumentDownload),
     Downloads(Res.string.settings_section_downloads, Iconsax.IconsaxDirectboxReceive),
     Desktop(Res.string.settings_section_desktop, Iconsax.IconsaxImportArrow2),
-    Support(Res.string.settings_section_support, Iconsax.IconsaxHeart2),
     About(Res.string.settings_section_about, Iconsax.IconsaxInformation),
+    // Plugins are an advanced topic: last tab instead of the first.
+    Plugins(Res.string.settings_section_plugins, Iconsax.IconsaxBoxAdd),
 }
 
 /**
@@ -322,14 +320,10 @@ private fun SettingsTabContent(
                             SettingsTab.Desktop ->
                                 desktopSection(settings, settingsViewModel, includeHeader = false)
 
-                            SettingsTab.Support ->
-                                supportSection(
-                                    settings = settings,
-                                    settingsViewModel = settingsViewModel,
-                                    includeHeader = false)
-
-                            SettingsTab.About ->
+                            SettingsTab.About -> {
+                                aboutSection(includeHeader = false)
                                 updatesSection(settings, settingsViewModel, includeHeader = false)
+                            }
                         }
                     }
                 }

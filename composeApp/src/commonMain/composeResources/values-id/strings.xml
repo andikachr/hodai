@@ -97,7 +97,7 @@
 
     <string name="settings_screen_title">Pengaturan</string>
 
-    <string name="settings_section_plugins">Plugin</string>
+    <string name="settings_section_plugins">Plugin (Lanjutan)</string>
     <string name="settings_section_language_region">Bahasa dan Wilayah</string>
     <string name="settings_section_appearance">Tampilan</string>
     <string name="settings_section_playback">Pemutaran</string>
@@ -107,6 +107,12 @@
     <string name="settings_section_updates">Pembaruan</string>
     <string name="settings_section_support">Dukungan</string>
     <string name="settings_section_about">Tentang</string>
+    <string name="settings_about_version">Versi %1$s</string>
+    <string name="settings_about_description">Pemutar musik yang tidak menghalangi. Cari, tekan putar, dan dengarkan — tanpa akun, tanpa iklan, tanpa ribet.</string>
+    <string name="settings_about_open_source_title">Sumber terbuka</string>
+    <string name="settings_about_open_source_subtitle">Hodai dibangun di atas proyek sumber terbuka Spotube dan merupakan perangkat lunak bebas di bawah lisensi GNU AGPL v3.</string>
+    <string name="settings_about_repository_title">Kode sumber</string>
+    <string name="settings_about_repository_subtitle">github.com/andikachr/hodai</string>
 
     <string name="common_close">Tutup</string>
     <string name="common_save">Simpan</string>
@@ -235,7 +241,7 @@
     <string name="settings_updates_auto_check_subtitle">Cari rilis Hodai baru di latar belakang.</string>
 
     <string name="settings_plugins_manage_title">Kelola Plugin</string>
-    <string name="settings_plugins_manage_subtitle">Kelola plugin kamu</string>
+    <string name="settings_plugins_manage_subtitle">Lanjutan: kelola plugin yang terpasang dan tambah plugin baru</string>
     <string name="settings_plugins_default_ability_title">Plugin %1$s Bawaan</string>
     <string name="settings_plugins_ability_metadata">Metadata</string>
     <string name="settings_plugins_ability_audio">Audio</string>
@@ -423,7 +429,7 @@
     <string name="welcome_donate_open_content_description">Buka %1$s</string>
 
     <!-- Support / donations -->
-    <string name="support_button_label">Dukung Hodai</string>
+    <string name="support_button_label">Tentang Hodai</string>
     <string name="support_dialog_title">Dukung Hodai</string>
     <string name="support_dialog_message">Hodai gratis, bebas, dan open source — tanpa iklan, tanpa langganan, tanpa pelacakan. Jika Hodai membuatmu senang, pertimbangkan untuk mendukung proyek ini.</string>
     <string name="support_dialog_reminder_hint">Kamu bisa mematikan pengingat ini di Pengaturan → Dukungan.</string>

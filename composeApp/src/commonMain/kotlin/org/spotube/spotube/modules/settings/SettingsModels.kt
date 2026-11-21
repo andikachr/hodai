@@ -22,6 +22,7 @@ import org.spotube.plugin_interfaces.plugin_apis.audio.AudioQuality
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.spotube.millennium.theme.MillenniumPalette
+import org.spotube.spotube.core.i18n.systemCountryCode
 
 @Serializable
 enum class Theme {
@@ -35,7 +36,7 @@ data class UserSettings(
     // it had no effect, so reading it would force English on existing users.
     @SerialName("appLanguage")
     val language: SupportedLanguages = SupportedLanguages.SYSTEM,
-    val country: CountryCode = CountryCode.BD,
+    val country: CountryCode = defaultCountryCode(),
 
     // Appearance
     val theme: Theme = Theme.SYSTEM,
@@ -93,6 +94,17 @@ data class UserSettings(
 
 /** The public Group Jam room server. */
 const val DEFAULT_JAM_SERVER_URL = "https://jam.spotube.cc"
+
+/**
+ * Region for fresh installs: the country of the device's system locale, so a
+ * new user starts in their own region instead of the upstream default (BD).
+ * Falls back to US when the system reports no usable country. Persisted
+ * settings are unaffected — this only supplies the initial default.
+ */
+internal fun defaultCountryCode(): CountryCode =
+    systemCountryCode()
+        ?.let { code -> CountryCode.entries.firstOrNull { it.code.equals(code, ignoreCase = true) } }
+        ?: CountryCode.US
 
 /** Whether [url] can be a room server address (http(s), or ws(s) for self-hosters). */
 internal fun isJamServerUrl(url: String): Boolean =

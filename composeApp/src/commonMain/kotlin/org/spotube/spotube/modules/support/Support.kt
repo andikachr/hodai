@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.Text
+import org.spotube.spotube.AppBuildInfo
 import org.spotube.spotube.core.ui.theming.AppTheme
 import org.spotube.spotube.openUrlInBrowser
 import org.spotube.spotube.resources.iconsax.BrandBuyMeACoffee
@@ -48,6 +49,12 @@ import org.spotube.millennium.composables.MillenniumButtonStyle
 import org.spotube.millennium.composables.MillenniumDialog
 import org.spotube.millennium.composables.MillenniumIcon
 import spotube.composeapp.generated.resources.Res
+import spotube.composeapp.generated.resources.common_close
+import spotube.composeapp.generated.resources.settings_about_description
+import spotube.composeapp.generated.resources.settings_about_open_source_subtitle
+import spotube.composeapp.generated.resources.settings_about_repository_title
+import spotube.composeapp.generated.resources.settings_about_version
+import spotube.composeapp.generated.resources.support_button_label
 import spotube.composeapp.generated.resources.support_dialog_dismiss
 import spotube.composeapp.generated.resources.support_dialog_message
 import spotube.composeapp.generated.resources.support_dialog_reminder_hint
@@ -74,8 +81,9 @@ val donationOptions: List<DonationOption> = emptyList()
 const val SupportReminderIntervalMillis: Long = 7L * 24 * 60 * 60 * 1000
 
 /**
- * Opens the support prompt from anywhere inside the app shell. Hosted at the app root so the
- * sidebar, home top bar and the periodic reminder all drive the same dialog.
+ * Opens the About dialog (formerly the support prompt) from anywhere inside the
+ * app shell. Hosted at the app root so the sidebar and home top bar drive the
+ * same dialog.
  */
 val LocalSupportPrompt = staticCompositionLocalOf { {} }
 
@@ -84,13 +92,22 @@ fun openDonation(option: DonationOption) {
     runCatching { openUrlInBrowser(option.url) }
 }
 
-/** A dialog that lets the user pick a way to support the project. */
+/**
+ * The dialog behind every "About Hodai" entry point (sidebar footer, home top bar).
+ * Hodai ships without donation destinations, so with an empty [donationOptions]
+ * this shows the About dialog instead of a support prompt; the donation picker
+ * below only renders if donation destinations are ever added back.
+ */
 @Composable
 fun SupportDialog(
     visible: Boolean,
     onDismissRequest: () -> Unit,
     isReminder: Boolean = false) {
     if (!visible) return
+    if (donationOptions.isEmpty()) {
+        AboutHodaiDialog(onDismissRequest = onDismissRequest)
+        return
+    }
     MillenniumDialog(visible = true, onDismissRequest = onDismissRequest) {
         MillenniumDialogHeader {
             MillenniumDialogTitle(stringResource(Res.string.support_dialog_title))
@@ -134,6 +151,51 @@ fun SupportDialog(
                 onClick = onDismissRequest,
                 style = MillenniumButtonStyle.Quiet) {
                 Text(stringResource(Res.string.support_dialog_dismiss))
+            }
+        }
+    }
+}
+
+/**
+ * About Hodai: identity and version, a short description, the open-source
+ * credit (the one place the upstream project is named, as the AGPL requires)
+ * and a link to the source repository.
+ */
+@Composable
+private fun AboutHodaiDialog(onDismissRequest: () -> Unit) {
+    MillenniumDialog(visible = true, onDismissRequest = onDismissRequest) {
+        MillenniumDialogHeader {
+            MillenniumDialogTitle(stringResource(Res.string.support_button_label))
+            MillenniumDialogClose()
+        }
+        MillenniumDialogBody {
+            MillenniumDialogDescription(
+                stringResource(
+                    Res.string.settings_about_version,
+                    AppBuildInfo.VERSION))
+            Text(
+                stringResource(Res.string.settings_about_description),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colors.onSurface)
+            Text(
+                stringResource(Res.string.settings_about_open_source_subtitle),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.onSurfaceVariant)
+            MillenniumButton(
+                onClick = {
+                    runCatching { openUrlInBrowser(AppBuildInfo.REPOSITORY_URL) }
+                    onDismissRequest()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                style = MillenniumButtonStyle.Secondary) {
+                Text(stringResource(Res.string.settings_about_repository_title))
+            }
+        }
+        MillenniumDialogFooter {
+            MillenniumButton(
+                onClick = onDismissRequest,
+                style = MillenniumButtonStyle.Quiet) {
+                Text(stringResource(Res.string.common_close))
             }
         }
     }

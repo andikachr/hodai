@@ -648,6 +648,13 @@ tasks.withType<ComposeHotRun>().configureEach {
     )
 }
 
+// The generated Res class package defaults to a name derived from rootProject.name.
+// The project was renamed to Hodai, but the sources import spotube.composeapp.generated.resources,
+// so pin the package explicitly or compilation fails with "Unresolved reference 'Res'".
+compose.resources {
+    packageOfResClass = "spotube.composeapp.generated.resources"
+}
+
 cargo {
     // Gobley defaults desktop to the debug profile, which ships an unstripped ~31 MB library
     if (isProductionBuild) jvmVariant = Variant.Release

@@ -20,6 +20,7 @@ package org.spotube.spotube.modules.lyrics
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,6 +39,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
@@ -70,7 +72,9 @@ fun SyncedLyricsList(
     lines: List<LyricsLine>,
     currentIndex: Int,
     modifier: Modifier = Modifier,
-    onLineClick: ((LyricsLine) -> Unit)? = null
+    onLineClick: ((LyricsLine) -> Unit)? = null,
+    romajiLines: List<String?>? = null,
+    translationLines: List<String?>? = null
 ) {
     val listState = rememberLazyListState()
     val colors = MillenniumTheme.colors
@@ -106,26 +110,55 @@ fun SyncedLyricsList(
                         else -> colors.muted
                     }
                 )
+                // Lirik+ layers never attach to blank (instrumental) lines.
+                val romaji = if (line.text.isBlank()) null
+                    else romajiLines?.getOrNull(index)?.takeIf { it.isNotBlank() }
+                val translation = if (line.text.isBlank()) null
+                    else translationLines?.getOrNull(index)?.takeIf { it.isNotBlank() }
                 if (onLineClick != null) {
                     ImmersiveLyricLine(
                         text = text,
+                        romaji = romaji,
+                        translation = translation,
                         distance = kotlin.math.abs(index - currentIndex),
                         isCurrent = isCurrent,
                         onClick = { onLineClick(line) }
                     )
                 } else {
-                    Text(
-                        text = text,
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp, vertical = 2.dp),
-                        style = AppTheme.typography.bodyMedium.copy(
-                            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-                            color = color
-                        ),
-                        textAlign = TextAlign.Center,
-                        maxLines = 2
-                    )
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = text,
+                            style = AppTheme.typography.bodyMedium.copy(
+                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
+                                color = color
+                            ),
+                            textAlign = TextAlign.Center,
+                            maxLines = 2
+                        )
+                        if (romaji != null) {
+                            Text(
+                                text = romaji,
+                                style = AppTheme.typography.bodySmall.copy(
+                                    color = color.copy(alpha = 0.75f)
+                                ),
+                                textAlign = TextAlign.Center,
+                                maxLines = 2
+                            )
+                        }
+                        if (translation != null) {
+                            Text(
+                                text = translation,
+                                style = AppTheme.typography.bodySmall.copy(color = color),
+                                textAlign = TextAlign.Center,
+                                maxLines = 2
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -135,6 +168,8 @@ fun SyncedLyricsList(
 @Composable
 private fun ImmersiveLyricLine(
     text: String,
+    romaji: String?,
+    translation: String?,
     distance: Int,
     isCurrent: Boolean,
     onClick: () -> Unit
@@ -155,8 +190,7 @@ private fun ImmersiveLyricLine(
         if (hovered && !isCurrent) colors.accent.copy(alpha = 0.10f) else Color.Transparent
     )
 
-    Text(
-        text = text,
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .graphicsLayer {
@@ -170,12 +204,35 @@ private fun ImmersiveLyricLine(
             .pointerHoverIcon(PointerIcon.Hand)
             .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
-        style = AppTheme.typography.headlineSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = color
-        ),
-        textAlign = TextAlign.Center
-    )
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = text,
+            style = AppTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = color
+            ),
+            textAlign = TextAlign.Center
+        )
+        if (romaji != null) {
+            Text(
+                text = romaji,
+                modifier = Modifier.padding(top = 3.dp),
+                style = AppTheme.typography.bodyMedium.copy(color = colors.muted),
+                textAlign = TextAlign.Center
+            )
+        }
+        if (translation != null) {
+            Text(
+                text = translation,
+                modifier = Modifier.padding(top = 3.dp),
+                style = AppTheme.typography.bodyLarge.copy(
+                    color = color.copy(alpha = 0.85f)
+                ),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }
 
 /** Fades the top and bottom [fade] of the content to transparent. */

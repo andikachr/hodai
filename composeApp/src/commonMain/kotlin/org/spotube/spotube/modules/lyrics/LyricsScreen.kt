@@ -76,6 +76,7 @@ import spotube.composeapp.generated.resources.lyrics_mode_plain
 import spotube.composeapp.generated.resources.lyrics_mode_synced
 import spotube.composeapp.generated.resources.lyrics_no_plain
 import spotube.composeapp.generated.resources.lyrics_no_synced
+import spotube.composeapp.generated.resources.lyrics_plus_searching_other_sources
 import spotube.composeapp.generated.resources.common_close
 
 @Composable
@@ -175,7 +176,18 @@ fun LyricsScreen(
 private fun ColumnScope.LyricsBody(uiState: LyricsUiState, viewModel: LyricsViewModel) {
     when {
         uiState.isLoading -> CenteredMessage {
-            MillenniumBarsLoader(size = 48.dp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                MillenniumBarsLoader(size = 48.dp)
+                if (uiState.isSearchingFallback) {
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(Res.string.lyrics_plus_searching_other_sources),
+                        style = AppTheme.typography.bodyMedium,
+                        color = MillenniumTheme.colors.muted,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
 
         uiState.error != null -> CenteredMessage {
@@ -190,11 +202,15 @@ private fun ColumnScope.LyricsBody(uiState: LyricsUiState, viewModel: LyricsView
         uiState.mode == LyricType.SYNCED -> SyncedLyricsContent(
             syncedLyrics = uiState.syncedLyrics ?: emptyList(),
             currentIndex = uiState.currentIndex,
-            onLineClick = viewModel::seekToLine
+            onLineClick = viewModel::seekToLine,
+            romajiLines = uiState.romajiLines,
+            translationLines = uiState.translationLines
         )
 
         uiState.mode == LyricType.STATIC -> PlainLyricsContent(
-            plainLyrics = uiState.plainLyrics ?: ""
+            plainLyrics = uiState.plainLyrics ?: "",
+            romajiLines = uiState.romajiLines,
+            translationLines = uiState.translationLines
         )
     }
 }
@@ -295,7 +311,9 @@ private fun ColumnScope.CenteredMessage(content: @Composable () -> Unit) {
 private fun ColumnScope.SyncedLyricsContent(
     syncedLyrics: List<LyricsLine>,
     currentIndex: Int,
-    onLineClick: (LyricsLine) -> Unit) {
+    onLineClick: (LyricsLine) -> Unit,
+    romajiLines: List<String?>? = null,
+    translationLines: List<String?>? = null) {
     if (syncedLyrics.isEmpty()) {
         CenteredMessage {
             Text(
@@ -312,13 +330,17 @@ private fun ColumnScope.SyncedLyricsContent(
         lines = syncedLyrics,
         currentIndex = currentIndex,
         onLineClick = onLineClick,
+        romajiLines = romajiLines,
+        translationLines = translationLines,
         modifier = Modifier.weight(1f).fillMaxWidth()
     )
 }
 
 @Composable
 private fun ColumnScope.PlainLyricsContent(
-    plainLyrics: String) {
+    plainLyrics: String,
+    romajiLines: List<String?>? = null,
+    translationLines: List<String?>? = null) {
     if (plainLyrics.isBlank()) {
         CenteredMessage {
             Text(
@@ -331,18 +353,69 @@ private fun ColumnScope.PlainLyricsContent(
         return
     }
 
+    if (romajiLines == null && translationLines == null) {
+        LazyColumn(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 20.dp)
+        ) {
+            item {
+                Text(
+                    text = plainLyrics,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = AppTheme.typography.titleMedium.copy(lineHeight = 34.sp),
+                    color = MillenniumTheme.colors.text,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        return
+    }
+
+    // With Lirik+ layers the plain lyrics render line by line so each line
+    // can carry its romaji / translation underneath.
+    val lines = plainLyrics.split("\n")
     LazyColumn(
         modifier = Modifier.weight(1f).fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 20.dp)
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        item {
-            Text(
-                text = plainLyrics,
-                modifier = Modifier.fillMaxWidth(),
-                style = AppTheme.typography.titleMedium.copy(lineHeight = 34.sp),
-                color = MillenniumTheme.colors.text,
-                textAlign = TextAlign.Center
-            )
+        items(lines.size) { index ->
+            val line = lines[index]
+            if (line.isBlank()) {
+                Spacer(Modifier.height(6.dp))
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = line,
+                        style = AppTheme.typography.titleMedium,
+                        color = MillenniumTheme.colors.text,
+                        textAlign = TextAlign.Center
+                    )
+                    romajiLines?.getOrNull(index)?.takeIf { it.isNotBlank() }?.let { romaji ->
+                        Text(
+                            text = romaji,
+                            modifier = Modifier.padding(top = 2.dp),
+                            style = AppTheme.typography.bodyMedium.copy(
+                                color = MillenniumTheme.colors.muted
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    translationLines?.getOrNull(index)?.takeIf { it.isNotBlank() }?.let { translation ->
+                        Text(
+                            text = translation,
+                            modifier = Modifier.padding(top = 2.dp),
+                            style = AppTheme.typography.bodyMedium.copy(
+                                color = MillenniumTheme.colors.text.copy(alpha = 0.85f)
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
     }
 }

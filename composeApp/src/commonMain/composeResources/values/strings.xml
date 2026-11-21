@@ -774,6 +774,7 @@
     <string name="lyrics_mode_plain">Plain</string>
     <string name="lyrics_no_synced">No synced lyrics available</string>
     <string name="lyrics_no_plain">No plain lyrics available</string>
+    <string name="lyrics_plus_searching_other_sources">Still looking, trying other sources...</string>
 
     <!-- Settings: audio format/quality labels -->
     <string name="settings_audio_format_label">%1$s in %2$s</string>

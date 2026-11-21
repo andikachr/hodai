@@ -69,6 +69,12 @@ import org.spotube.spotube.modules.library.local_tracks.media.LocalMediaFoldersC
 import org.spotube.spotube.modules.library.local_tracks.media.LocalMediaLibraryCoordinator
 import org.spotube.spotube.modules.library.playlist.LibraryPlaylistsViewModel
 import org.spotube.spotube.modules.lyrics.LyricsViewModel
+import org.spotube.spotube.modules.lyrics.plus.FallbackLyricsSource
+import org.spotube.spotube.modules.lyrics.plus.LyricsPlusCache
+import org.spotube.spotube.modules.lyrics.plus.LyricsPlusRepository
+import org.spotube.spotube.modules.lyrics.plus.LyricsTranslator
+import org.spotube.spotube.modules.lyrics.plus.RomajiProvider
+import org.spotube.spotube.modules.lyrics.plus.UnavailableRomajiProvider
 import org.spotube.spotube.modules.playlist.AddTracksToPlaylistViewModel
 import org.spotube.spotube.modules.playlist.PlaylistRepository
 import org.spotube.spotube.modules.playlist.PlaylistViewModel
@@ -256,6 +262,11 @@ val sharedModules = module {
     }
 
     // Lyrics
+    singleOf(::FallbackLyricsSource)
+    singleOf(::LyricsTranslator)
+    singleOf(::LyricsPlusCache)
+    singleOf(::UnavailableRomajiProvider) { bind<RomajiProvider>() }
+    singleOf(::LyricsPlusRepository)
     viewModelOf(::LyricsViewModel)
 
     // Local playback proxy server

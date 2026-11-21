@@ -20,10 +20,15 @@ package org.spotube.spotube.modules.lyrics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.spotube.plugin_interfaces.plugin_apis.lyrics.LyricsLine
+import org.spotube.plugin_interfaces.plugin_apis.lyrics.LyricsResponse
 import org.spotube.spotube.core.audioplayer.AudioPlayerInterface
 import org.spotube.spotube.core.audioplayer.AudioPlayerQueue
 import org.spotube.spotube.core.audioplayer.QueueEntry
+import org.spotube.spotube.modules.lyrics.plus.LyricsPlusRepository
+import org.spotube.spotube.modules.lyrics.plus.systemLanguageCode
 import org.spotube.spotube.modules.plugin.PluginManager
+import org.spotube.spotube.modules.settings.SettingsProvider
+import org.spotube.spotube.modules.settings.SupportedLanguages
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -46,7 +51,13 @@ data class LyricsUiState(
     val mode: LyricType = LyricType.SYNCED,
     val syncedLyrics: List<LyricsLine>? = null,
     val plainLyrics: String? = null,
+    /** Lirik+ romaji layer, aligned with the synced (or plain) lines; null = no layer. */
+    val romajiLines: List<String?>? = null,
+    /** Lirik+ translation layer, aligned the same way; null = no layer. */
+    val translationLines: List<String?>? = null,
     val isLoading: Boolean = false,
+    /** True while the plugin came back empty and fallback sources are being tried. */
+    val isSearchingFallback: Boolean = false,
     val error: String? = null,
     val currentIndex: Int = -1,
     val trackTitle: String = "",
@@ -56,7 +67,9 @@ data class LyricsUiState(
 class LyricsViewModel(
     private val pluginManager: PluginManager,
     private val audioPlayer: AudioPlayerInterface,
-    private val audioPlayerQueue: AudioPlayerQueue) : ViewModel() {
+    private val audioPlayerQueue: AudioPlayerQueue,
+    private val settingsProvider: SettingsProvider,
+    private val lyricsPlusRepository: LyricsPlusRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LyricsUiState())
 
@@ -90,25 +103,65 @@ class LyricsViewModel(
             }
 
             currentTrackId = track.id
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    isSearchingFallback = false,
+                    romajiLines = null,
+                    translationLines = null)
+            }
             try {
+                var pluginLyrics: LyricsResponse? = null
                 pluginManager.selectedLyricsPlugin.value?.let { pluginService ->
                     pluginService.use {
-                       val lyrics = lyricsAPI.getLyrics(track)
-
-                        _uiState.update {
-                            it.copy(
-                                syncedLyrics = lyrics?.syncedLyrics,
-                                plainLyrics = lyrics?.plainLyrics,
-                                isLoading = false)
-                        }
+                        pluginLyrics = lyricsAPI.getLyrics(track)
                     }
-                } ?: run {
-                    _uiState.update { it.copy(isLoading = false) }
+                }
+
+                val hasPluginLyrics =
+                    pluginLyrics?.syncedLyrics?.isNotEmpty() == true ||
+                        !pluginLyrics?.plainLyrics.isNullOrBlank()
+                if (!hasPluginLyrics) {
+                    _uiState.update { it.copy(isSearchingFallback = true) }
+                }
+
+                // Lirik+: layered fallback coverage + romaji/translation
+                // layers, cached per track. Any failure inside resolves to
+                // null and the plugin result (if any) is used as-is.
+                val plusResult = try {
+                    lyricsPlusRepository.resolve(track, pluginLyrics, effectiveAppLanguage())
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (currentTrackId != track.id) return@launch
+
+                _uiState.update {
+                    it.copy(
+                        syncedLyrics = plusResult?.syncedLyrics ?: pluginLyrics?.syncedLyrics,
+                        plainLyrics = plusResult?.plainLyrics ?: pluginLyrics?.plainLyrics,
+                        romajiLines = plusResult?.romajiLines,
+                        translationLines = plusResult?.translationLines,
+                        isLoading = false,
+                        isSearchingFallback = false)
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update {
+                    it.copy(isLoading = false, isSearchingFallback = false, error = e.message)
+                }
             }
+        }
+    }
+
+    /** The language the UI runs in: the settings pick, or the system language. */
+    private fun effectiveAppLanguage(): String {
+        val language = settingsProvider.settingsState.value?.language
+            ?: SupportedLanguages.SYSTEM
+        return if (language == SupportedLanguages.SYSTEM) {
+            systemLanguageCode() ?: "en"
+        } else {
+            language.languageTag ?: language.locale
         }
     }
 

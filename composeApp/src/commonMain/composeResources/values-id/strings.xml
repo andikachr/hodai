@@ -586,6 +586,7 @@
     <string name="lyrics_mode_plain">Biasa</string>
     <string name="lyrics_no_synced">Lirik tersinkron tidak tersedia</string>
     <string name="lyrics_no_plain">Lirik biasa tidak tersedia</string>
+    <string name="lyrics_plus_searching_other_sources">Masih dicari, mencoba sumber lain...</string>
 
     <!-- Settings: audio format/quality labels -->
     <string name="settings_audio_format_label">%1$s dalam %2$s</string>

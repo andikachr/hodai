@@ -226,6 +226,49 @@ class PluginManager(
             initialValue = PluginManagerStates.Loading
         )
 
+    // Hodai ships as a finished product: instead of asking the user to find and
+    // install a catalog (metadata) plugin on first run, the app installs a
+    // vetted one automatically and selects it. Audio and lyrics are already
+    // covered by the built-in plugins. If the download fails (e.g. offline),
+    // the next launch simply tries again.
+    private val defaultMetadataPluginUrl =
+        "https://github.com/piper-plumber/spotube-plugin-youtube-music/releases/download/0.2.0/plugin.smplug"
+
+    private var defaultPluginSeedAttempted = false
+
+    init {
+        scope.launch {
+            state.collect { current ->
+                if (current is PluginManagerStates.Data) {
+                    ensureDefaultMetadataPlugin(current)
+                }
+            }
+        }
+    }
+
+    private fun ensureDefaultMetadataPlugin(current: PluginManagerStates.Data) {
+        if (defaultPluginSeedAttempted) return
+        if (current.plugins.any { PluginAbility.METADATA in it.abilities }) return
+        defaultPluginSeedAttempted = true
+        scope.launch {
+            try {
+                val response = httpClient.get(defaultMetadataPluginUrl)
+                val bytes = response.bodyAsChannel().readRemaining().readByteArray()
+                addPluginFromByteArray(bytes)
+                val installed = (state.value as? PluginManagerStates.Data)
+                    ?.plugins?.firstOrNull { PluginAbility.METADATA in it.abilities }
+                if (installed != null) {
+                    setSelectedPlugin(PluginAbility.METADATA, installed)
+                } else {
+                    defaultPluginSeedAttempted = false
+                }
+            } catch (e: Exception) {
+                logger.e(e) { "Failed to install the default catalog plugin" }
+                defaultPluginSeedAttempted = false
+            }
+        }
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val ziplineServices = state
         .filterIsInstance<PluginManagerStates.Data>()

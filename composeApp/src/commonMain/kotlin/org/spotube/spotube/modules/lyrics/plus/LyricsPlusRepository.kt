@@ -78,11 +78,12 @@ class LyricsPlusRepository(
                 romajiLines = entry.romajiLines,
                 translationLines = entry.translationLines)
             // A plain-only cache entry must not lock out the fallback
-            // chain when the plugin has nothing either: the chain's
-            // fuzzy search may well hold the synced lyrics the plugin's
-            // exact match missed. Hold the entry as a floor instead and
-            // let the chain try.
-            val lockOut = entry.syncedLyrics.isNullOrEmpty() && primaryLines == null
+            // chain when neither it nor the plugin has synced lyrics:
+            // the chain's fuzzy search may well hold the synced lyrics
+            // the plugin's exact match missed (or answered plain-only).
+            // Hold the entry as a floor instead and let the chain try.
+            val lockOut = entry.syncedLyrics.isNullOrEmpty() &&
+                primary?.syncedLyrics?.isNotEmpty() != true
             if ((primaryLines == null || cachedLines == null ||
                     primaryLines == cachedLines) && !lockOut
             ) {
@@ -91,15 +92,27 @@ class LyricsPlusRepository(
             if (lockOut) heldPlainCache = cacheResult
         }
 
+        // The plugin is the answer only when it has SYNCED lyrics. A
+        // plain-only plugin answer does not end the search: the fallback
+        // chain hunts synced lyrics first and its plain result is only a
+        // floor, exactly as between the chain's own sources.
         var source = SOURCE_PLUGIN
-        var response = primary?.takeIf {
-            it.syncedLyrics?.isNotEmpty() == true || !it.plainLyrics.isNullOrBlank()
-        }
+        var response = primary?.takeIf { it.syncedLyrics?.isNotEmpty() == true }
         if (response == null) {
             val fallback = fallbackSource.getLyrics(track)
-                ?: return heldPlainCache ?: return null
-            response = fallback.response
-            source = fallback.source
+            if (fallback != null &&
+                fallback.response.syncedLyrics?.isNotEmpty() == true
+            ) {
+                response = fallback.response
+                source = fallback.source
+            } else {
+                response = primary?.takeIf { !it.plainLyrics.isNullOrBlank() }
+                    ?: fallback?.response
+                    ?: return heldPlainCache ?: return null
+                if (fallback != null && response == fallback.response) {
+                    source = fallback.source
+                }
+            }
         }
 
         val displayLines = response.syncedLyrics?.map { it.text }

@@ -111,17 +111,17 @@ fun LyricsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    scaleX = 1.35f
-                    scaleY = 1.35f
-                    alpha = 0.55f
+                    scaleX = 1.15f
+                    scaleY = 1.15f
+                    alpha = 0.75f
                 }
-                .blur(56.dp),
+                .blur(28.dp),
             contentScale = ContentScale.Crop
         )
         Box(
             Modifier
                 .fillMaxSize()
-                .background(colors.background.copy(alpha = 0.72f))
+                .background(colors.background.copy(alpha = 0.58f))
         )
 
         Column(Modifier.fillMaxSize()) {

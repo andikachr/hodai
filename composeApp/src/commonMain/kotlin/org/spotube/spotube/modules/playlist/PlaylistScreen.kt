@@ -121,6 +121,7 @@ fun PlaylistScreen(
         isPlayLoading = playbackUiState.isPlayLoading,
         isShuffleLoading = playbackUiState.isShuffleLoading,
         isAddToQueueLoading = playbackUiState.isAddToQueueLoading,
+        eyebrow = stringResource(Res.string.media_playlist),
         title = playlist?.title ?: stringResource(Res.string.playlist_loading_title),
         description = playlist?.description.orEmpty(),
         imageURL = artworkUrl,

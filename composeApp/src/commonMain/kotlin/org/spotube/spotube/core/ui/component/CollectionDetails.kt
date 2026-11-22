@@ -19,22 +19,19 @@ package org.spotube.spotube.core.ui.component
 
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.foundation.layout.height
 import org.spotube.millennium.composables.MillenniumButton
-import org.spotube.millennium.composables.MillenniumButtonStyle
-import org.spotube.millennium.composables.MillenniumCard
 import org.spotube.millennium.composables.MillenniumIcon
 import org.spotube.millennium.composables.MillenniumIconButton
 import org.spotube.millennium.composables.MillenniumIconButtonStyle
-import org.spotube.millennium.composables.MillenniumSeparator
+import org.spotube.millennium.theme.MillenniumTheme
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import com.composeunstyled.currentWindowWidthBreakpoint
 import org.spotube.millennium.adaptive.WindowBreakpoints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,10 +45,14 @@ import com.composeunstyled.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import org.spotube.spotube.core.ui.misc.TextWithShimmer
 import org.spotube.spotube.core.ui.misc.shimmerApply
@@ -69,6 +70,12 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import spotube.composeapp.generated.resources.*
 
+/**
+ * Collection header in the Hodai mock language: no card — the artwork's own
+ * colors wash the backdrop (blurred, veiled), the artwork sits at the left,
+ * and the right side carries the eyebrow, the big title, the description,
+ * the owner/meta line and one gold play pill with ring outline actions.
+ */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CollectionDetails(
@@ -95,146 +102,44 @@ fun CollectionDetails(
     onFollowClick: () -> Unit = { },
     showFollowButton: Boolean = true,
     onEdit: (() -> Unit)? = null,
-    sharedElementKey: String? = null) {
+    sharedElementKey: String? = null,
+    /** Small caps label above the title, e.g. PLAYLIST or ALBUM. */
+    eyebrow: String? = null,
+    /** Extra meta after the owner name, e.g. "24 songs · about 1 hr 40 min". */
+    metaText: String? = null) {
     Box(modifier = modifier.fillMaxWidth()) {
         val isCompact = currentWindowWidthBreakpoint() isBelow WindowBreakpoints.Medium
 
         val sharedTransitionScope = LocalSharedTransitionScope.current
         val animatedVisibilityScope = LocalAnimatedVisibilityScope.current
 
-        val playPauseButton = @Composable {
-            if (isJamGuest) {
-                if (onAddToJam != null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MillenniumButton(
-                            modifier = if (isCompact) Modifier.weight(1f) else Modifier,
-                            onClick = onAddToJam!!) {
-                            MillenniumIcon(
-                                imageVector = Iconsax.IconsaxAddSquare,
-                                contentDescription = stringResource(Res.string.track_options_add_to_jam))
-                            TextWithShimmer(text = stringResource(Res.string.track_options_add_to_jam))
-                        }
+        // Blurred artwork wash behind the header (locked blur recipe).
+        // matchParentSize: the wash follows the header's height instead of
+        // stretching it (this header lives inside a lazy list item).
+        if (imageURL.isNotBlank()) {
+            AsyncImage(
+                model = imageURL,
+                contentDescription = null,
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        scaleX = 1.15f
+                        scaleY = 1.15f
+                        alpha = 0.75f
                     }
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    val modifier = if (isCompact) {
-                        Modifier.weight(1f)
-                    } else {
-                        Modifier
-                    }
-
-                    MillenniumButton(
-                        modifier = modifier,
-                        onClick = onPlay,
-                        loading = isPlayLoading) {
-                        MillenniumIcon(
-                            imageVector = if (isPlaying) Iconsax.IconsaxPauseCircle else Iconsax.IconsaxPlayCircle2,
-                            contentDescription = if (isPlaying) stringResource(Res.string.player_pause_content_description) else stringResource(Res.string.player_play_content_description))
-                        TextWithShimmer(text = if (isPlaying) stringResource(Res.string.player_pause_content_description) else stringResource(Res.string.player_play_content_description))
-                    }
-                    MillenniumButton(
-                        modifier = modifier,
-                        onClick = onShufflePlay,
-                        loading = isShuffleLoading,
-                        style = MillenniumButtonStyle.Secondary
-                    ) {
-                        MillenniumIcon(imageVector = Iconsax.IconsaxShuffle, contentDescription = stringResource(Res.string.collection_details_shuffle_play))
-                        TextWithShimmer(text = stringResource(Res.string.collection_details_shuffle))
-                    }
-                }
-            }
-        }
-
-        val actions = @Composable {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                MillenniumIconButton(
-                    onClick = onAddToQueue,
-                    loading = isAddToQueueLoading,
-                    style = MillenniumIconButtonStyle.Quiet) {
-                    MillenniumIcon(
-                        imageVector = Iconsax.IconsaxAddSquare,
-                        contentDescription = stringResource(Res.string.player_add_to_queue_content_description)
-                    )
-                }
-                MillenniumSeparator(modifier = Modifier.height(24.dp), vertical = true)
-                if (showFollowButton) {
-                    if (isFollowing) {
-                        MillenniumIconButton(
-                            onClick = onFollowClick,
-                            loading = isFollowLoading,
-                            style = MillenniumIconButtonStyle.Quiet) {
-                            MillenniumIcon(
-                                imageVector = Iconsax.IconsaxHeart2,
-                                contentDescription = stringResource(Res.string.collection_details_unfollow))
-                        }
-                    } else {
-                        MillenniumIconButton(
-                            onClick = onFollowClick,
-                            loading = isFollowLoading,
-                            style = MillenniumIconButtonStyle.Quiet) {
-                            MillenniumIcon(
-                                imageVector = Iconsax.IconsaxHeart,
-                                contentDescription = stringResource(Res.string.collection_details_follow),
-                                tint = AppTheme.colors.onSurfaceVariant)
-                        }
-                    }
-                }
-                if (onEdit != null) {
-                    MillenniumSeparator(modifier = Modifier.height(24.dp), vertical = true)
-                    MillenniumIconButton(
-                        onClick = onEdit,
-                        style = MillenniumIconButtonStyle.Quiet) {
-                        MillenniumIcon(
-                            imageVector = Iconsax.IconsaxEdit,
-                            contentDescription = stringResource(Res.string.collection_details_edit_playlist))
-                    }
-                }
-            }
-        }
-        val ownerInfo = @Composable {
-            Row(
-                modifier = Modifier.clickable(onClick = onOwnerClick),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (ownerImageURL != null) {
-                    AsyncImage(
-                        model = ownerImageURL,
-                        contentDescription = ownerName,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .shimmerApply(),
-                        contentScale = ContentScale.Crop)
-                } else {
-                    MillenniumIcon(
-                        imageVector = Iconsax.User,
-                        contentDescription = ownerName,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .background(
-                                AppTheme.colors.primaryContainer,
-                                CircleShape
-                            )
-                            .padding(6.dp),
-                        tint = AppTheme.colors.onPrimaryContainer)
-                }
-                TextWithShimmer(
-                    text = stringResource(Res.string.collection_details_by_owner, ownerName),
-                    style = AppTheme.typography.labelSmall,
-                    color = AppTheme.colors.onSurfaceVariant)
-            }
+                    .blur(28.dp),
+                contentScale = ContentScale.Crop)
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .background(AppTheme.colors.background.copy(alpha = 0.58f)))
         }
 
         val artwork = @Composable {
             Box(
                 modifier = Modifier
                     .size(if (isCompact) 100.dp else 200.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .sharedElementOrNone(
                         key = sharedElementKey,
                         sharedTransitionScope = sharedTransitionScope,
@@ -263,69 +168,197 @@ fun CollectionDetails(
         }
 
         val metadata = @Composable {
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (eyebrow != null) {
+                    TextWithShimmer(
+                        text = eyebrow.uppercase(),
+                        style = AppTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 2.sp),
+                        color = MillenniumTheme.colors.accent)
+                }
                 TextWithShimmer(
                     text = title,
-                    style = if (isCompact) AppTheme.typography.bodyLarge else AppTheme.typography.headlineLarge,
-                    maxLines = 1,
+                    style = if (isCompact) {
+                        AppTheme.typography.titleLarge
+                    } else {
+                        AppTheme.typography.displaySmall
+                    },
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis)
 
                 if (description.isNotBlank()) {
                     TextWithShimmer(
                         text = description,
-                        style = if (isCompact) AppTheme.typography.labelSmall else AppTheme.typography.bodyMedium,
+                        style = AppTheme.typography.bodyMedium,
                         color = AppTheme.colors.onSurfaceVariant,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis)
                 }
             }
         }
 
-        MillenniumCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            contentPadding = PaddingValues(0.dp)) {
-            if (isCompact) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically) {
-                        artwork()
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            metadata()
-                            ownerInfo()
-                            actions()
+        val metaRow = @Composable {
+            Row(
+                modifier = Modifier.clickable(onClick = onOwnerClick),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (ownerImageURL != null) {
+                    AsyncImage(
+                        model = ownerImageURL,
+                        contentDescription = ownerName,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clip(CircleShape)
+                            .shimmerApply(),
+                        contentScale = ContentScale.Crop)
+                } else {
+                    MillenniumIcon(
+                        imageVector = Iconsax.User,
+                        contentDescription = ownerName,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .background(
+                                AppTheme.colors.primaryContainer,
+                                CircleShape
+                            )
+                            .padding(4.dp),
+                        tint = AppTheme.colors.onPrimaryContainer)
+                }
+                TextWithShimmer(
+                    text = ownerName,
+                    style = AppTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold))
+                if (metaText != null) {
+                    TextWithShimmer(
+                        text = "· $metaText",
+                        style = AppTheme.typography.labelLarge,
+                        color = AppTheme.colors.onSurfaceVariant)
+                }
+            }
+        }
+
+        val actionsRow = @Composable {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (isJamGuest) {
+                    if (onAddToJam != null) {
+                        MillenniumButton(onClick = onAddToJam) {
+                            MillenniumIcon(
+                                imageVector = Iconsax.IconsaxAddSquare,
+                                contentDescription = stringResource(Res.string.track_options_add_to_jam))
+                            TextWithShimmer(text = stringResource(Res.string.track_options_add_to_jam))
                         }
                     }
-                    playPauseButton()
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.Top) {
-                    artwork()
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        metadata()
-                        ownerInfo()
-                        actions()
-                        playPauseButton()
+                } else {
+                    MillenniumButton(
+                        onClick = onPlay,
+                        loading = isPlayLoading) {
+                        MillenniumIcon(
+                            imageVector = if (isPlaying) Iconsax.IconsaxPauseCircle else Iconsax.IconsaxPlayCircle2,
+                            contentDescription = if (isPlaying) stringResource(Res.string.player_pause_content_description) else stringResource(Res.string.player_play_content_description))
+                        TextWithShimmer(text = if (isPlaying) stringResource(Res.string.player_pause_content_description) else stringResource(Res.string.player_play_content_description))
+                    }
+                    RingIconButton(
+                        onClick = onShufflePlay,
+                        loading = isShuffleLoading) {
+                        MillenniumIcon(
+                            imageVector = Iconsax.IconsaxShuffle,
+                            contentDescription = stringResource(Res.string.collection_details_shuffle_play))
+                    }
+                    RingIconButton(
+                        onClick = onAddToQueue,
+                        loading = isAddToQueueLoading) {
+                        MillenniumIcon(
+                            imageVector = Iconsax.IconsaxAddSquare,
+                            contentDescription = stringResource(Res.string.player_add_to_queue_content_description))
+                    }
+                    if (showFollowButton) {
+                        RingIconButton(
+                            onClick = onFollowClick,
+                            loading = isFollowLoading) {
+                            MillenniumIcon(
+                                imageVector = if (isFollowing) Iconsax.IconsaxHeart2 else Iconsax.IconsaxHeart,
+                                contentDescription = stringResource(
+                                    if (isFollowing) Res.string.collection_details_unfollow
+                                    else Res.string.collection_details_follow),
+                                tint = if (isFollowing) {
+                                    MillenniumTheme.colors.accent
+                                } else {
+                                    AppTheme.colors.onSurfaceVariant
+                                })
+                        }
+                    }
+                    if (onEdit != null) {
+                        RingIconButton(onClick = onEdit) {
+                            MillenniumIcon(
+                                imageVector = Iconsax.IconsaxEdit,
+                                contentDescription = stringResource(Res.string.collection_details_edit_playlist))
+                        }
                     }
                 }
             }
+        }
+
+        if (isCompact) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    artwork()
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        metadata()
+                        metaRow()
+                    }
+                }
+                actionsRow()
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                artwork()
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    metadata()
+                    metaRow()
+                    actionsRow()
+                }
+            }
+        }
+    }
+}
+
+/** A 44dp circle outline button, the mock's secondary action shape. */
+@Composable
+private fun RingIconButton(
+    onClick: () -> Unit,
+    loading: Boolean = false,
+    content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .border(1.dp, AppTheme.colors.outline, CircleShape),
+        contentAlignment = Alignment.Center) {
+        MillenniumIconButton(
+            onClick = onClick,
+            loading = loading,
+            style = MillenniumIconButtonStyle.Quiet) {
+            content()
         }
     }
 }

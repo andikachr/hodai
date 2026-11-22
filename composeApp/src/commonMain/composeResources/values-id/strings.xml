@@ -603,6 +603,9 @@
     <string name="home_popular_play">Putar</string>
 
     <!-- Lyrics -->
+    <string name="collection_details_song_count">%1$d lagu</string>
+    <string name="collection_details_duration_about_hr">sekitar %1$d jam %2$d mnt</string>
+    <string name="collection_details_duration_about_min">sekitar %1$d mnt</string>
     <string name="lyrics_pill_romaji">Romaji</string>
     <string name="lyrics_pill_translation">Terjemahan</string>
     <string name="lyrics_rail_repeat">Ulangi</string>

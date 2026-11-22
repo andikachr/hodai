@@ -101,7 +101,25 @@ fun CollectionView(
     onAddToJam: (List<MetadataTrack>) -> Unit = {},
     trackOptionsState: (MetadataTrack) -> TrackOptionsState = { TrackOptionsState() },
     footerContent: (@Composable () -> Unit)? = null,
-    trailingContent: @Composable () -> Unit = {}) {
+    trailingContent: @Composable () -> Unit = {},
+    /** Small caps label above the header title, e.g. PLAYLIST or ALBUM. */
+    eyebrow: String? = null) {
+    // Mock meta line: song count + total length, only when the full list
+    // is loaded (a paginated partial list would under-report).
+    val metaText = if (!hasMore && tracks.isNotEmpty()) {
+        val totalMs = tracks.sumOf { it.durationMs }
+        val hours = totalMs / 3_600_000
+        val minutes = (totalMs % 3_600_000) / 60_000
+        val count = stringResource(Res.string.collection_details_song_count, tracks.size)
+        val length = if (hours > 0) {
+            stringResource(Res.string.collection_details_duration_about_hr, hours, minutes)
+        } else {
+            stringResource(Res.string.collection_details_duration_about_min, minutes)
+        }
+        "$count · $length"
+    } else {
+        null
+    }
     val listState = rememberLazyListState()
     val isCollapsed by remember {
         derivedStateOf {
@@ -173,7 +191,9 @@ fun CollectionView(
                                 onEdit = onEdit,
                                 sharedElementKey = sharedElementKey,
                                 isJamGuest = isJamGuest,
-                                onAddToJam = { onAddToJam(tracks) })
+                                onAddToJam = { onAddToJam(tracks) },
+                                eyebrow = eyebrow,
+                                metaText = metaText)
                         }
                     } else {
                         CollectionDetails(
@@ -198,7 +218,9 @@ fun CollectionView(
                             onEdit = onEdit,
                             sharedElementKey = sharedElementKey,
                             isJamGuest = isJamGuest,
-                            onAddToJam = { onAddToJam(tracks) })
+                            onAddToJam = { onAddToJam(tracks) },
+                            eyebrow = eyebrow,
+                            metaText = metaText)
                     }
                 },
                 footerContent = footerContent,

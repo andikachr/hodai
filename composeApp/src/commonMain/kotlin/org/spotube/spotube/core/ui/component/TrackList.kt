@@ -635,7 +635,7 @@ private fun TrackListRow(
     val isRowHovered by rowInteractionSource.collectIsHoveredAsState()
     val rowBackgroundColor = when {
         isSelected -> AppTheme.colors.secondary.copy(alpha = 0.12f)
-        isCurrentTrack && isCurrentTrackPlaying -> AppTheme.colors.primaryContainer
+        isCurrentTrack && isCurrentTrackPlaying -> AppTheme.colors.primary.copy(alpha = 0.15f)
         isCurrentTrack -> AppTheme.colors.surfaceVariant
         trackOptionsState.isBlacklisted -> AppTheme.colors.error.copy(alpha = 0.1f)
         else -> Color.Transparent

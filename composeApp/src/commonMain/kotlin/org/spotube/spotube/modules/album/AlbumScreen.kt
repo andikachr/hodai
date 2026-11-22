@@ -75,6 +75,7 @@ fun AlbumScreen(
         isPlayLoading = playbackUiState.isPlayLoading,
         isShuffleLoading = playbackUiState.isShuffleLoading,
         isAddToQueueLoading = playbackUiState.isAddToQueueLoading,
+        eyebrow = stringResource(Res.string.player_track_details_album),
         title = album?.title ?: stringResource(Res.string.album_loading_title),
         description = album?.description ?: "${album?.albumType?.name.orEmpty()} • ${album?.releaseDate.orEmpty()}",
         imageURL = artworkUrl,

@@ -791,6 +791,9 @@
     <string name="home_popular_play">Play</string>
 
     <!-- Lyrics -->
+    <string name="collection_details_song_count">%1$d songs</string>
+    <string name="collection_details_duration_about_hr">about %1$d hr %2$d min</string>
+    <string name="collection_details_duration_about_min">about %1$d min</string>
     <string name="lyrics_pill_romaji">Romaji</string>
     <string name="lyrics_pill_translation">Translation</string>
     <string name="lyrics_rail_repeat">Repeat</string>

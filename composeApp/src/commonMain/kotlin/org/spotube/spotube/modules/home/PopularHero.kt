@@ -89,11 +89,14 @@ fun PopularHero(
     modifier: Modifier = Modifier
 ) {
     val filteredItems = remember(items) {
+        // The locked mock shows five discs, all fully inside the band; a
+        // longer feed spreads the coverflow past the band edges and clips
+        // the outer discs.
         items.filter {
             it is MetadataBrowseItem.Album ||
                 it is MetadataBrowseItem.Playlist ||
                 it is MetadataBrowseItem.Track
-        }
+        }.take(5)
     }
 
     if (filteredItems.isEmpty()) return
@@ -210,7 +213,7 @@ private fun PopularHeroContent(
             Coverflow(
                 state = state,
                 params = CoverflowParams(
-                    size = 0.52f,
+                    size = 0.64f,
                     offset = 0.5f,
                     angle = 12f,
                     shift = 0.255f,

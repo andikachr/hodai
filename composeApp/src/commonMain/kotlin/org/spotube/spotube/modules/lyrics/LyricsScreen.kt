@@ -27,6 +27,8 @@ import org.spotube.millennium.composables.MillenniumSegmentedButtonDefaults
 import org.spotube.millennium.composables.MillenniumSegmentedButtonRow
 import org.spotube.millennium.theme.MillenniumTheme
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,8 +36,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -62,14 +66,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.time.Duration
 import org.spotube.plugin_interfaces.plugin_apis.lyrics.LyricsLine
+import org.spotube.spotube.core.audioplayer.LoopState
 import org.spotube.spotube.core.ui.component.ApplicationBackButton
+import org.spotube.spotube.modules.settings.SettingsViewModel
+import org.spotube.spotube.modules.shell.formatPlayerTime
 import org.spotube.spotube.resources.iconsax.Iconsax
-import org.spotube.spotube.resources.iconsax.IconsaxArrowDown4
+import org.spotube.spotube.resources.iconsax.IconsaxCloseSquare
+import org.spotube.spotube.resources.iconsax.IconsaxNext
+import org.spotube.spotube.resources.iconsax.IconsaxPause
+import org.spotube.spotube.resources.iconsax.IconsaxPlay
+import org.spotube.spotube.resources.iconsax.IconsaxPrevious
+import org.spotube.spotube.resources.iconsax.IconsaxRepeateMusic
+import org.spotube.spotube.resources.iconsax.IconsaxRepeateOne
+import org.spotube.spotube.resources.iconsax.IconsaxShuffle
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import spotube.composeapp.generated.resources.Res
@@ -78,12 +95,23 @@ import spotube.composeapp.generated.resources.lyrics_mode_plain
 import spotube.composeapp.generated.resources.lyrics_mode_synced
 import spotube.composeapp.generated.resources.lyrics_no_plain
 import spotube.composeapp.generated.resources.lyrics_no_synced
+import spotube.composeapp.generated.resources.lyrics_pill_romaji
+import spotube.composeapp.generated.resources.lyrics_pill_translation
 import spotube.composeapp.generated.resources.lyrics_plus_searching_other_sources
+import spotube.composeapp.generated.resources.lyrics_rail_repeat
+import spotube.composeapp.generated.resources.player_disable_shuffle_content_description
+import spotube.composeapp.generated.resources.player_enable_shuffle_content_description
+import spotube.composeapp.generated.resources.player_next_content_description
+import spotube.composeapp.generated.resources.player_pause_content_description
+import spotube.composeapp.generated.resources.player_play_content_description
+import spotube.composeapp.generated.resources.player_previous_content_description
+import spotube.composeapp.generated.resources.settings_section_lyrics
 import spotube.composeapp.generated.resources.common_close
 
 @Composable
 fun LyricsScreen(
     viewModel: LyricsViewModel = koinViewModel(),
+    settingsViewModel: SettingsViewModel = koinViewModel(),
     modifier: Modifier = Modifier,
     onClose: (() -> Unit)? = null) {
     val uiState by viewModel.uiState.collectAsState()
@@ -125,46 +153,85 @@ fun LyricsScreen(
         )
 
         Column(Modifier.fillMaxSize()) {
+            // Stage header (owner-locked mock): the song leads on the left,
+            // the Lirik+ layer pills and the close button sit on the right.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.width(48.dp), contentAlignment = Alignment.CenterStart) {
-                    if (onClose != null) {
-                        MillenniumIconButton(
-                            onClick = onClose,
-                            style = MillenniumIconButtonStyle.Quiet
-                        ) {
-                            MillenniumIcon(
-                                imageVector = Iconsax.IconsaxArrowDown4,
-                                contentDescription = stringResource(Res.string.common_close)
-                            )
+                if (onClose == null) {
+                    ApplicationBackButton()
+                    Spacer(Modifier.width(8.dp))
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = uiState.trackTitle,
+                        style = AppTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = colors.text,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis)
+                    Text(
+                        text = uiState.trackArtists.uppercase() + " · " +
+                            stringResource(Res.string.settings_section_lyrics).uppercase(),
+                        style = AppTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
+                        color = colors.muted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis)
+                }
+                MillenniumSegmentedButtonRow(Modifier.widthIn(max = 210.dp)) {
+                    MillenniumSegmentedButton(
+                        selected = uiState.mode == LyricType.SYNCED,
+                        onClick = { viewModel.setMode(LyricType.SYNCED) },
+                        shape = MillenniumSegmentedButtonDefaults.itemShape(0, 2),
+                        modifier = Modifier.weight(1f)
+                    ) { Text(stringResource(Res.string.lyrics_mode_synced)) }
+                    MillenniumSegmentedButton(
+                        selected = uiState.mode == LyricType.STATIC,
+                        onClick = { viewModel.setMode(LyricType.STATIC) },
+                        shape = MillenniumSegmentedButtonDefaults.itemShape(1, 2),
+                        modifier = Modifier.weight(1f)
+                    ) { Text(stringResource(Res.string.lyrics_mode_plain)) }
+                }
+                Spacer(Modifier.width(14.dp))
+                LayerPill(
+                    label = stringResource(Res.string.lyrics_pill_romaji).uppercase(),
+                    selected = uiState.romajiEnabled,
+                    onClick = {
+                        val next = !uiState.romajiEnabled
+                        settingsViewModel.updateSettings { copy(lyricsRomajiEnabled = next) }
+                        viewModel.setRomajiEnabled(next)
+                    })
+                Spacer(Modifier.width(8.dp))
+                LayerPill(
+                    label = stringResource(Res.string.lyrics_pill_translation).uppercase(),
+                    selected = uiState.translationEnabled,
+                    onClick = {
+                        val next = !uiState.translationEnabled
+                        settingsViewModel.updateSettings {
+                            copy(lyricsTranslationEnabled = next)
                         }
-                    } else {
-                        ApplicationBackButton()
+                        viewModel.setTranslationEnabled(next)
+                    })
+                if (onClose != null) {
+                    Spacer(Modifier.width(8.dp))
+                    MillenniumIconButton(
+                        onClick = onClose,
+                        style = MillenniumIconButtonStyle.Quiet
+                    ) {
+                        MillenniumIcon(
+                            imageVector = Iconsax.IconsaxCloseSquare,
+                            contentDescription = stringResource(Res.string.common_close)
+                        )
                     }
                 }
-                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    MillenniumSegmentedButtonRow(Modifier.widthIn(max = 280.dp)) {
-                        MillenniumSegmentedButton(
-                            selected = uiState.mode == LyricType.SYNCED,
-                            onClick = { viewModel.setMode(LyricType.SYNCED) },
-                            shape = MillenniumSegmentedButtonDefaults.itemShape(0, 2),
-                            modifier = Modifier.weight(1f)
-                        ) { Text(stringResource(Res.string.lyrics_mode_synced)) }
-                        MillenniumSegmentedButton(
-                            selected = uiState.mode == LyricType.STATIC,
-                            onClick = { viewModel.setMode(LyricType.STATIC) },
-                            shape = MillenniumSegmentedButtonDefaults.itemShape(1, 2),
-                            modifier = Modifier.weight(1f)
-                        ) { Text(stringResource(Res.string.lyrics_mode_plain)) }
-                    }
-                }
-                Spacer(Modifier.width(48.dp))
             }
 
             if (isWide) {
+                // Mock layout: the lyrics own the left, the cover and the
+                // transport live on a rail at the right.
                 Row(
                     modifier = Modifier
                         .weight(1f)
@@ -173,16 +240,12 @@ fun LyricsScreen(
                     horizontalArrangement = Arrangement.spacedBy(40.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TrackPane(uiState, Modifier.weight(0.38f))
-                    Column(Modifier.weight(0.62f).fillMaxHeight()) {
+                    Column(Modifier.weight(0.58f).fillMaxHeight()) {
                         LyricsBody(uiState, viewModel)
                     }
+                    PlayerRail(uiState, viewModel, Modifier.weight(0.42f))
                 }
             } else {
-                CompactTrackHeader(
-                    uiState,
-                    Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp)
-                )
                 Column(
                     Modifier
                         .weight(1f)
@@ -262,8 +325,49 @@ private fun CoverArt(url: String, size: Dp, radius: Dp, elevation: Dp, modifier:
     }
 }
 
+/** A Lirik+ layer toggle in the stage header: gold while the layer is on. */
 @Composable
-private fun TrackPane(uiState: LyricsUiState, modifier: Modifier = Modifier) {
+private fun LayerPill(label: String, selected: Boolean, onClick: () -> Unit) {
+    val colors = MillenniumTheme.colors
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) colors.accent else Color.Transparent)
+            .then(
+                if (selected) Modifier
+                else Modifier.border(1.dp, colors.border, RoundedCornerShape(50))
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 7.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            style = AppTheme.typography.labelLarge.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.sp
+            ),
+            color = if (selected) colors.onAccent else colors.muted
+        )
+    }
+}
+
+/**
+ * The stage's right rail (owner-locked mock): the cover card, a thin gold
+ * progress line with the times, and the transport row with a big gold
+ * play/pause disc.
+ */
+@Composable
+private fun PlayerRail(
+    uiState: LyricsUiState,
+    viewModel: LyricsViewModel,
+    modifier: Modifier = Modifier) {
+    val colors = MillenniumTheme.colors
+    val fraction = if (uiState.duration > Duration.ZERO) {
+        (uiState.position / uiState.duration).toFloat().coerceIn(0f, 1f)
+    } else {
+        0f
+    }
     Column(
         modifier = modifier.fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -271,54 +375,125 @@ private fun TrackPane(uiState: LyricsUiState, modifier: Modifier = Modifier) {
     ) {
         CoverArt(
             url = uiState.coverUrl,
-            size = 280.dp,
+            size = 300.dp,
             radius = 24.dp,
             elevation = 14.dp
         )
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = uiState.trackTitle,
-            style = AppTheme.typography.headlineSmall,
-            color = MillenniumTheme.colors.text,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = uiState.trackArtists,
-            style = AppTheme.typography.bodyLarge,
-            color = MillenniumTheme.colors.muted,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun CompactTrackHeader(uiState: LyricsUiState, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        CoverArt(url = uiState.coverUrl, size = 48.dp, radius = 12.dp, elevation = 4.dp)
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = uiState.trackTitle,
-                style = AppTheme.typography.titleSmall,
-                color = MillenniumTheme.colors.text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = uiState.trackArtists,
-                style = AppTheme.typography.bodySmall,
-                color = MillenniumTheme.colors.muted,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        Spacer(Modifier.height(22.dp))
+        Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(colors.border)
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth(fraction)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(colors.accent)
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = formatPlayerTime(uiState.position),
+                    style = AppTheme.typography.bodySmall,
+                    color = colors.muted)
+                Text(
+                    text = formatPlayerTime(uiState.duration),
+                    style = AppTheme.typography.bodySmall,
+                    color = colors.muted)
+            }
+        }
+        Spacer(Modifier.height(18.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            MillenniumIconButton(
+                onClick = { viewModel.toggleShuffle() },
+                style = MillenniumIconButtonStyle.Quiet
+            ) {
+                MillenniumIcon(
+                    imageVector = Iconsax.IconsaxShuffle,
+                    contentDescription = stringResource(
+                        if (uiState.shuffleEnabled) {
+                            Res.string.player_disable_shuffle_content_description
+                        } else {
+                            Res.string.player_enable_shuffle_content_description
+                        }
+                    ),
+                    tint = if (uiState.shuffleEnabled) colors.accent else colors.muted)
+            }
+            MillenniumIconButton(
+                onClick = { viewModel.skipToPrevious() },
+                style = MillenniumIconButtonStyle.Quiet
+            ) {
+                MillenniumIcon(
+                    imageVector = Iconsax.IconsaxPrevious,
+                    contentDescription = stringResource(
+                        Res.string.player_previous_content_description
+                    ),
+                    tint = colors.text)
+            }
+            Box(
+                modifier = Modifier
+                    .size(58.dp)
+                    .clip(CircleShape)
+                    .background(colors.accent)
+                    .clickable { viewModel.togglePlayPause() },
+                contentAlignment = Alignment.Center
+            ) {
+                MillenniumIcon(
+                    imageVector = if (uiState.isPlaying) {
+                        Iconsax.IconsaxPause
+                    } else {
+                        Iconsax.IconsaxPlay
+                    },
+                    contentDescription = stringResource(
+                        if (uiState.isPlaying) {
+                            Res.string.player_pause_content_description
+                        } else {
+                            Res.string.player_play_content_description
+                        }
+                    ),
+                    modifier = Modifier.size(26.dp),
+                    tint = colors.onAccent)
+            }
+            MillenniumIconButton(
+                onClick = { viewModel.skipToNext() },
+                style = MillenniumIconButtonStyle.Quiet
+            ) {
+                MillenniumIcon(
+                    imageVector = Iconsax.IconsaxNext,
+                    contentDescription = stringResource(
+                        Res.string.player_next_content_description
+                    ),
+                    tint = colors.text)
+            }
+            MillenniumIconButton(
+                onClick = { viewModel.cycleLoop() },
+                style = MillenniumIconButtonStyle.Quiet
+            ) {
+                MillenniumIcon(
+                    imageVector = if (uiState.loopState == LoopState.ONE) {
+                        Iconsax.IconsaxRepeateOne
+                    } else {
+                        Iconsax.IconsaxRepeateMusic
+                    },
+                    contentDescription = stringResource(Res.string.lyrics_rail_repeat),
+                    tint = if (uiState.loopState == LoopState.NONE) {
+                        colors.muted
+                    } else {
+                        colors.accent
+                    })
+            }
         }
     }
 }
@@ -388,7 +563,7 @@ private fun ColumnScope.PlainLyricsContent(
                     modifier = Modifier.fillMaxWidth(),
                     style = AppTheme.typography.titleMedium.copy(lineHeight = 34.sp),
                     color = MillenniumTheme.colors.text,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Start
                 )
             }
         }
@@ -410,22 +585,22 @@ private fun ColumnScope.PlainLyricsContent(
             } else {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.Start
                 ) {
                     Text(
                         text = line,
                         style = AppTheme.typography.titleMedium,
                         color = MillenniumTheme.colors.text,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Start
                     )
                     romajiLines?.getOrNull(index)?.takeIf { it.isNotBlank() }?.let { romaji ->
                         Text(
                             text = romaji,
                             modifier = Modifier.padding(top = 2.dp),
                             style = AppTheme.typography.bodyMedium.copy(
-                                color = MillenniumTheme.colors.muted
+                                color = MillenniumTheme.colors.accent.copy(alpha = 0.9f)
                             ),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Start
                         )
                     }
                     translationLines?.getOrNull(index)?.takeIf { it.isNotBlank() }?.let { translation ->
@@ -433,9 +608,9 @@ private fun ColumnScope.PlainLyricsContent(
                             text = translation,
                             modifier = Modifier.padding(top = 2.dp),
                             style = AppTheme.typography.bodyMedium.copy(
-                                color = MillenniumTheme.colors.text.copy(alpha = 0.85f)
+                                color = MillenniumTheme.colors.text.copy(alpha = 0.78f)
                             ),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Start
                         )
                     }
                 }

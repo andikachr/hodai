@@ -603,6 +603,9 @@
     <string name="home_popular_play">Putar</string>
 
     <!-- Lyrics -->
+    <string name="lyrics_pill_romaji">Romaji</string>
+    <string name="lyrics_pill_translation">Terjemahan</string>
+    <string name="lyrics_rail_repeat">Ulangi</string>
     <string name="lyrics_mode_synced">Tersinkron</string>
     <string name="lyrics_mode_plain">Biasa</string>
     <string name="lyrics_no_synced">Lirik tersinkron tidak tersedia</string>

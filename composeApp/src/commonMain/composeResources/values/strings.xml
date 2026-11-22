@@ -791,6 +791,9 @@
     <string name="home_popular_play">Play</string>
 
     <!-- Lyrics -->
+    <string name="lyrics_pill_romaji">Romaji</string>
+    <string name="lyrics_pill_translation">Translation</string>
+    <string name="lyrics_rail_repeat">Repeat</string>
     <string name="lyrics_mode_synced">Synced</string>
     <string name="lyrics_mode_plain">Plain</string>
     <string name="lyrics_no_synced">No synced lyrics available</string>

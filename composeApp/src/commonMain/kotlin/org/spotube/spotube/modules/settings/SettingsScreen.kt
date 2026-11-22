@@ -140,6 +140,13 @@ private fun CompactSettingsContent(
                     settingsViewModel = settingsViewModel,
                     navigatorCommands = navigatorCommands,
                     requestLocalNetworkPermission = requestLocalNetworkPermission)
+                // Desktop sits right under Playback so the equalizer is
+                // easy to find instead of buried near the bottom.
+                if (isDesktopPlatform) {
+                    desktopSection(
+                        settings = settings,
+                        settingsViewModel = settingsViewModel)
+                }
                 lyricsSection(
                     settings = settings,
                     settingsViewModel = settingsViewModel)
@@ -152,11 +159,6 @@ private fun CompactSettingsContent(
                 downloadsSection(
                     settings = settings,
                     settingsViewModel = settingsViewModel)
-                if (isDesktopPlatform) {
-                    desktopSection(
-                        settings = settings,
-                        settingsViewModel = settingsViewModel)
-                }
                 aboutSection()
                 updatesSection(
                     settings = settings,

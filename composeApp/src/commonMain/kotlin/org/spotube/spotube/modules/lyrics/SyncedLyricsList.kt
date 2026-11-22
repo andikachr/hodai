@@ -249,7 +249,7 @@ private fun ImmersiveLyricLine(
             Text(
                 text = text,
                 style = (
-                    if (isCurrent) AppTheme.typography.headlineMedium
+                    if (isCurrent) AppTheme.typography.displaySmall
                     else AppTheme.typography.headlineSmall
                     ).copy(
                     fontWeight = FontWeight.Bold,

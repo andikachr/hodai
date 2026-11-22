@@ -23,6 +23,8 @@ import org.spotube.plugin_interfaces.plugin_apis.lyrics.LyricsLine
 import org.spotube.plugin_interfaces.plugin_apis.lyrics.LyricsResponse
 import org.spotube.spotube.core.audioplayer.AudioPlayerInterface
 import org.spotube.spotube.core.audioplayer.AudioPlayerQueue
+import org.spotube.spotube.core.audioplayer.LoopState
+import org.spotube.spotube.core.audioplayer.PlayerState
 import org.spotube.spotube.core.audioplayer.QueueEntry
 import org.spotube.spotube.modules.lyrics.plus.LyricsPlusRepository
 import org.spotube.spotube.modules.lyrics.plus.systemLanguageCode
@@ -39,6 +41,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 @Serializable
@@ -62,7 +65,16 @@ data class LyricsUiState(
     val currentIndex: Int = -1,
     val trackTitle: String = "",
     val trackArtists: String = "",
-    val coverUrl: String = "")
+    val coverUrl: String = "",
+    /** Playback snapshot for the stage's player rail (mock layout). */
+    val isPlaying: Boolean = false,
+    val position: Duration = Duration.ZERO,
+    val duration: Duration = Duration.ZERO,
+    val shuffleEnabled: Boolean = false,
+    val loopState: LoopState = LoopState.NONE,
+    /** Lirik+ layer switches, mirrored from the user settings. */
+    val romajiEnabled: Boolean = true,
+    val translationEnabled: Boolean = true)
 
 class LyricsViewModel(
     private val pluginManager: PluginManager,
@@ -80,8 +92,38 @@ class LyricsViewModel(
     ) { lyrics, position -> activeLineIndex(lyrics, position.inWholeMilliseconds) }
         .distinctUntilChanged()
 
-    val uiState: StateFlow<LyricsUiState> = combine(_uiState, currentIndexFlow) { state, index ->
-        state.copy(currentIndex = index)
+    private data class PlaybackSnapshot(
+        val isPlaying: Boolean = false,
+        val position: Duration = Duration.ZERO,
+        val duration: Duration = Duration.ZERO,
+        val shuffleEnabled: Boolean = false,
+        val loopState: LoopState = LoopState.NONE)
+
+    private val playbackFlow = combine(
+        audioPlayer.playerStateFlow,
+        audioPlayer.positionFlow,
+        audioPlayer.durationFlow,
+        audioPlayer.shuffleModeFlow,
+        audioPlayer.loopStateFlow
+    ) { state, position, duration, shuffle, loop ->
+        PlaybackSnapshot(
+            isPlaying = state == PlayerState.PLAYING,
+            position = position,
+            duration = duration,
+            shuffleEnabled = shuffle,
+            loopState = loop)
+    }
+
+    val uiState: StateFlow<LyricsUiState> = combine(
+        _uiState, currentIndexFlow, playbackFlow
+    ) { state, index, playback ->
+        state.copy(
+            currentIndex = index,
+            isPlaying = playback.isPlaying,
+            position = playback.position,
+            duration = playback.duration,
+            shuffleEnabled = playback.shuffleEnabled,
+            loopState = playback.loopState)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LyricsUiState())
 
     private var currentTrackId: String? = null
@@ -90,7 +132,10 @@ class LyricsViewModel(
         _uiState.update { it.copy(mode = mode) }
     }
 
-    fun loadLyrics(forceReload: Boolean = false) {
+    fun loadLyrics(
+        forceReload: Boolean = false,
+        romajiEnabled: Boolean? = null,
+        translationEnabled: Boolean? = null) {
         viewModelScope.launch {
             val entry = audioPlayerQueue.currentQueueEntryFlow.value ?: return@launch
             val track = when (entry) {
@@ -130,13 +175,16 @@ class LyricsViewModel(
                 // layers, cached per track. Any failure inside resolves to
                 // null and the plugin result (if any) is used as-is.
                 val currentSettings = settingsProvider.settingsState.value
+                val useRomaji = romajiEnabled ?: currentSettings?.lyricsRomajiEnabled ?: true
+                val useTranslation = translationEnabled
+                    ?: currentSettings?.lyricsTranslationEnabled ?: true
                 val plusResult = try {
                     lyricsPlusRepository.resolve(
                         track,
                         pluginLyrics,
                         effectiveAppLanguage(),
-                        romajiEnabled = currentSettings?.lyricsRomajiEnabled ?: true,
-                        translationEnabled = currentSettings?.lyricsTranslationEnabled ?: true)
+                        romajiEnabled = useRomaji,
+                        translationEnabled = useTranslation)
                 } catch (e: Exception) {
                     null
                 }
@@ -149,6 +197,8 @@ class LyricsViewModel(
                         plainLyrics = plusResult?.plainLyrics ?: pluginLyrics?.plainLyrics,
                         romajiLines = plusResult?.romajiLines,
                         translationLines = plusResult?.translationLines,
+                        romajiEnabled = useRomaji,
+                        translationEnabled = useTranslation,
                         isLoading = false,
                         isSearchingFallback = false)
                 }
@@ -200,6 +250,45 @@ class LyricsViewModel(
         viewModelScope.launch {
             audioPlayer.seekTo(line.time.milliseconds)
         }
+    }
+
+    // Player rail controls (the stage carries its own transport, per mock).
+    fun togglePlayPause() {
+        viewModelScope.launch {
+            if (audioPlayer.playerStateFlow.value == PlayerState.PLAYING) {
+                audioPlayer.pause()
+            } else {
+                audioPlayer.play()
+            }
+        }
+    }
+
+    fun skipToNext() {
+        viewModelScope.launch { audioPlayer.skipToNext() }
+    }
+
+    fun skipToPrevious() {
+        viewModelScope.launch { audioPlayer.skipToPrevious() }
+    }
+
+    fun toggleShuffle() {
+        viewModelScope.launch { audioPlayer.shuffle(!audioPlayer.shuffleModeFlow.value) }
+    }
+
+    fun cycleLoop() {
+        viewModelScope.launch { audioPlayer.loop(audioPlayer.loopStateFlow.value.next()) }
+    }
+
+    /** Stage pill: flip the romaji layer and re-resolve with the new flag. */
+    fun setRomajiEnabled(enabled: Boolean) {
+        _uiState.update { it.copy(romajiEnabled = enabled) }
+        loadLyrics(forceReload = true, romajiEnabled = enabled)
+    }
+
+    /** Stage pill: flip the translation layer and re-resolve likewise. */
+    fun setTranslationEnabled(enabled: Boolean) {
+        _uiState.update { it.copy(translationEnabled = enabled) }
+        loadLyrics(forceReload = true, translationEnabled = enabled)
     }
 
     private fun activeLineIndex(lyrics: List<LyricsLine>?, positionMillis: Long): Int {

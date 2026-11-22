@@ -767,6 +767,7 @@
     <string name="search_error_users">Failed to search users</string>
 
     <!-- Home -->
+    <string name="home_preparing_catalog">Preparing your music…</string>
     <string name="home_title_browse">Browse</string>
     <string name="home_popular">Popular</string>
     <string name="home_popular_play">Play</string>

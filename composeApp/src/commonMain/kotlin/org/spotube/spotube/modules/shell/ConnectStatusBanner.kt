@@ -42,10 +42,12 @@ import compose.icons.feathericons.ChevronRight
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.spotube.millennium.composables.MillenniumBarsLoader
 import org.spotube.millennium.composables.MillenniumIcon
 import org.spotube.millennium.theme.MillenniumTheme
 import org.spotube.spotube.core.ui.theming.AppTheme
 import spotube.composeapp.generated.resources.Res
+import spotube.composeapp.generated.resources.home_preparing_catalog
 import spotube.composeapp.generated.resources.connect_jam_hosting
 import spotube.composeapp.generated.resources.connect_jam_joined
 import spotube.composeapp.generated.resources.devices_remote_playing_on
@@ -65,7 +67,7 @@ fun ConnectStatusBanner(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val remote = state.remote
     val jam = state.jam
-    if (remote == null && jam == null) return
+    if (remote == null && jam == null && !state.preparingCatalog) return
 
     Column(
         modifier = modifier
@@ -73,8 +75,33 @@ fun ConnectStatusBanner(
             .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
+        if (state.preparingCatalog) PreparingRow()
         if (remote != null) StatusRow(remoteStatusLabel(remote), onOpenRemote)
         if (jam != null) StatusRow(jamStatusLabel(jam), onOpenJam)
+    }
+}
+
+/** First-run strip while the bundled catalog plugin is still being prepared. */
+@Composable
+private fun PreparingRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(AppTheme.shapes.medium)
+            .background(AppTheme.colors.primary.copy(alpha = 0.12f))
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        MillenniumBarsLoader(size = 16.dp)
+        Text(
+            text = stringResource(Res.string.home_preparing_catalog),
+            style = AppTheme.typography.labelLarge,
+            color = AppTheme.colors.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import org.spotube.spotube.modules.plugin.PluginManager
+import org.spotube.spotube.modules.plugin.PluginManagerStates
 import org.spotube.spotube.core.jam.JamRole
 import org.spotube.spotube.core.jam.JamRoomService
 import org.spotube.spotube.core.remote.ConnectionState
@@ -36,22 +38,30 @@ data class JamConnectStatus(val isHost: Boolean, val listenerCount: Int)
 
 data class ConnectStatusUiState(
     val remote: RemoteConnectStatus? = null,
-    val jam: JamConnectStatus? = null)
+    val jam: JamConnectStatus? = null,
+    /** True while no catalog (metadata) plugin is installed yet: the bundled
+     * catalog is still being prepared on first run. */
+    val preparingCatalog: Boolean = false)
 
 /** Live remote-control / Group Jam status shown by the Home header and the sidebar. */
 class ConnectStatusViewModel(
     remoteControlClient: RemoteControlClient,
-    jamRoomService: JamRoomService
+    jamRoomService: JamRoomService,
+    pluginManager: PluginManager
 ) : ViewModel() {
     val uiState: StateFlow<ConnectStatusUiState> = combine(
         remoteControlClient.connectionState,
         jamRoomService.role,
-        jamRoomService.participants
-    ) { connection, role, participants ->
+        jamRoomService.participants,
+        pluginManager.state,
+        pluginManager.metadataPlugins
+    ) { connection, role, participants, pluginState, metadataPlugins ->
         ConnectStatusUiState(
             remote = (connection as? ConnectionState.Connected)?.let {
                 RemoteConnectStatus(it.deviceName.ifBlank { null })
             },
-            jam = role?.let { JamConnectStatus(isHost = it == JamRole.Host, listenerCount = participants.size) })
+            jam = role?.let { JamConnectStatus(isHost = it == JamRole.Host, listenerCount = participants.size) },
+            preparingCatalog = pluginState is PluginManagerStates.Data &&
+                metadataPlugins.isEmpty())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ConnectStatusUiState())
 }

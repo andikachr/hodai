@@ -301,7 +301,12 @@ private fun ColumnScope.LyricsBody(uiState: LyricsUiState, viewModel: LyricsView
         )
 
         uiState.mode == LyricType.STATIC -> PlainLyricsContent(
-            plainLyrics = uiState.plainLyrics ?: "",
+            // The Lirik+ layers are aligned with the synced line set whenever
+            // one exists, so static mode renders those same lines untimed.
+            // Rendering the separate plain text here would zip the layers
+            // against a differently segmented line set and drift.
+            lines = uiState.syncedLyrics?.map { it.text }?.takeIf { it.isNotEmpty() }
+                ?: (uiState.plainLyrics ?: "").split("\n"),
             romajiLines = uiState.romajiLines,
             translationLines = uiState.translationLines
         )
@@ -543,10 +548,10 @@ private fun ColumnScope.SyncedLyricsContent(
 
 @Composable
 private fun ColumnScope.PlainLyricsContent(
-    plainLyrics: String,
+    lines: List<String>,
     romajiLines: List<String?>? = null,
     translationLines: List<String?>? = null) {
-    if (plainLyrics.isBlank()) {
+    if (lines.all { it.isBlank() }) {
         CenteredMessage {
             Text(
                 text = stringResource(Res.string.lyrics_no_plain),
@@ -565,7 +570,7 @@ private fun ColumnScope.PlainLyricsContent(
         ) {
             item {
                 Text(
-                    text = plainLyrics,
+                    text = lines.joinToString("\n"),
                     modifier = Modifier.fillMaxWidth(),
                     style = AppTheme.typography.titleMedium.copy(lineHeight = 34.sp),
                     color = MillenniumTheme.colors.text,
@@ -576,9 +581,8 @@ private fun ColumnScope.PlainLyricsContent(
         return
     }
 
-    // With Lirik+ layers the plain lyrics render line by line so each line
+    // With Lirik+ layers the lyrics render line by line so each line
     // can carry its romaji / translation underneath.
-    val lines = plainLyrics.split("\n")
     LazyColumn(
         modifier = Modifier.weight(1f).fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 20.dp),

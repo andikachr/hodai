@@ -163,20 +163,22 @@ fun SpectrumSeekBar(
 @Composable
 fun PlayingCoverOverlay(modifier: Modifier = Modifier) {
     val phase = rememberSpectrumPhase(active = true)
+    // Rich gold on a firm dark scrim: pale bars on a bright cover used to
+    // wash out completely, so the scrim carries the contrast.
     val brush = Brush.verticalGradient(
-        listOf(AppTheme.colors.primary, MillenniumTheme.colors.highlight)
+        listOf(MillenniumTheme.colors.accentTop, MillenniumTheme.colors.accentBottom)
     )
-    val pattern = remember { listOf(6f, 11f, 8f, 13f, 9f, 12f, 7f, 10f) }
+    val pattern = remember { listOf(8f, 13f, 10f, 16f, 11f, 14f, 9f, 12f) }
 
     Box(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(18.dp)
+                .height(22.dp)
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.55f))
+                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.78f))
                     )
                 )
         )

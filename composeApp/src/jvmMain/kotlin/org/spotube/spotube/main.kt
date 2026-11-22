@@ -25,11 +25,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import org.jetbrains.compose.resources.painterResource
@@ -64,6 +66,8 @@ import org.spotube.spotube.core.ui.component.LocalWindowState
 import org.spotube.spotube.core.window.PersistedWindowState
 import org.spotube.spotube.core.window.WindowStateRepository
 import org.spotube.spotube.core.window.coerceForScreen
+import org.spotube.spotube.modules.lyrics.FloatingLyricsModel
+import org.spotube.spotube.modules.lyrics.FloatingLyricsStrip
 import org.spotube.spotube.modules.settings.SettingsProvider
 import org.spotube.spotube.modules.settings.SupportedLanguages
 
@@ -75,6 +79,7 @@ private object KoinServicesProvider : KoinComponent {
     val systemTrayService: SystemTrayService get() = get()
     val settingsProvider: SettingsProvider get() = get()
     val windowStateRepository: WindowStateRepository get() = get()
+    val floatingLyricsModel: FloatingLyricsModel get() = get()
 }
 
 private const val WINDOW_SCREEN_FRACTION = 0.85f
@@ -239,6 +244,32 @@ fun main() {
                 LocalWindowState provides windowState
             ) {
                 App()
+            }
+        }
+
+        // Hodai floating lyrics: a borderless always-on-top overlay window
+        // (bottom-center) that follows playback while other apps are in
+        // front. It exists only while the setting is on, and hides with
+        // the main window.
+        if (settings?.floatingLyricsEnabled == true) {
+            val floatingModel = remember { KoinServicesProvider.floatingLyricsModel }
+            val floatingState = rememberWindowState(
+                position = WindowPosition(Alignment.BottomCenter),
+                width = 760.dp,
+                height = 150.dp)
+            DecoratedWindow(
+                onCloseRequest = {},
+                state = floatingState,
+                title = "Hodai",
+                visible = isWindowVisible,
+                resizable = false,
+                focusable = false,
+                alwaysOnTop = true,
+                undecorated = true,
+                transparent = true,
+                hiddenFromDock = true
+            ) {
+                FloatingLyricsStrip(model = floatingModel)
             }
         }
     }

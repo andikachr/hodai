@@ -26,7 +26,10 @@ import org.spotube.spotube.modules.settings.components.SwitchSettingCard
 import org.spotube.spotube.resources.iconsax.Iconsax
 import org.spotube.spotube.resources.iconsax.IconsaxLanguageSquare
 import org.spotube.spotube.resources.iconsax.IconsaxMicrophone
+import org.spotube.spotube.resources.iconsax.IconsaxMusicPlay
 import spotube.composeapp.generated.resources.Res
+import spotube.composeapp.generated.resources.settings_floating_lyrics_subtitle
+import spotube.composeapp.generated.resources.settings_floating_lyrics_title
 import spotube.composeapp.generated.resources.settings_lyrics_romaji_subtitle
 import spotube.composeapp.generated.resources.settings_lyrics_romaji_title
 import spotube.composeapp.generated.resources.settings_lyrics_translation_subtitle
@@ -71,6 +74,24 @@ internal fun LazyListScope.lyricsSection(
                 onCheckedChange = { enabled ->
                     settingsViewModel.updateSettings {
                         copy(lyricsTranslationEnabled = enabled)
+                    }
+                }
+            )
+        }
+        add {
+            SwitchSettingCard(
+                title = stringResource(Res.string.settings_floating_lyrics_title),
+                subtitle = stringResource(Res.string.settings_floating_lyrics_subtitle),
+                icon = {
+                    SettingsItemIcon(
+                        Iconsax.IconsaxMusicPlay,
+                        stringResource(Res.string.settings_floating_lyrics_title)
+                    )
+                },
+                checked = settings.floatingLyricsEnabled,
+                onCheckedChange = { enabled ->
+                    settingsViewModel.updateSettings {
+                        copy(floatingLyricsEnabled = enabled)
                     }
                 }
             )

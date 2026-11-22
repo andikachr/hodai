@@ -102,6 +102,9 @@
     <string name="settings_section_appearance">Tampilan</string>
     <string name="settings_section_playback">Pemutaran</string>
     <string name="settings_section_lyrics">Lirik</string>
+    <string name="settings_floating_lyrics_title">Lirik melayang</string>
+    <string name="settings_floating_lyrics_subtitle">Tampilkan baris lirik yang sedang jalan di jendela kecil di atas aplikasi lain (desktop)</string>
+    <string name="floating_lyrics_waiting">Putar lagu, baris liriknya muncul di sini</string>
     <string name="settings_lyrics_romaji_title">Romaji untuk lagu Jepang</string>
     <string name="settings_lyrics_romaji_subtitle">Tampilkan baris bacaan romaji di bawah lirik Jepang</string>
     <string name="settings_lyrics_translation_title">Terjemahan lirik</string>

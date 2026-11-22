@@ -69,6 +69,7 @@ import org.spotube.spotube.modules.library.local_tracks.media.LocalMediaCacheRep
 import org.spotube.spotube.modules.library.local_tracks.media.LocalMediaFoldersConfig
 import org.spotube.spotube.modules.library.local_tracks.media.LocalMediaLibraryCoordinator
 import org.spotube.spotube.modules.library.playlist.LibraryPlaylistsViewModel
+import org.spotube.spotube.modules.lyrics.FloatingLyricsModel
 import org.spotube.spotube.modules.lyrics.LyricsViewModel
 import org.spotube.spotube.modules.lyrics.plus.FallbackLyricsSource
 import org.spotube.spotube.modules.lyrics.plus.LyricsPlusCache
@@ -269,6 +270,7 @@ val sharedModules = module {
     single<RomajiProvider> { createRomajiProvider() }
     singleOf(::LyricsPlusRepository)
     viewModelOf(::LyricsViewModel)
+    singleOf(::FloatingLyricsModel)
 
     // Local playback proxy server
     single {

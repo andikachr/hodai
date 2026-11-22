@@ -59,6 +59,9 @@ data class UserSettings(
     val equalizerEnabled: Boolean = false,
     val equalizerPreset: String = "Flat",
 
+    // Floating lyrics overlay window (desktop)
+    val floatingLyricsEnabled: Boolean = false,
+
     // Remote Control (LAN)
     val allowRemoteControl: Boolean = false,
     val allowedRemoteDevices: List<String> = emptyList(),

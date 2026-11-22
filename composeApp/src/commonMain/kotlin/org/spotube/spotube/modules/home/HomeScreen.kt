@@ -102,6 +102,7 @@ import spotube.composeapp.generated.resources.Res
 import spotube.composeapp.generated.resources.welcome_app_name
 import spotube.composeapp.generated.resources.support_button_label
 import spotube.composeapp.generated.resources.devices_title
+import spotube.composeapp.generated.resources.home_recently_played
 import spotube.composeapp.generated.resources.home_title_browse
 import spotube.composeapp.generated.resources.jam_screen_title
 import kotlinx.coroutines.flow.distinctUntilChanged

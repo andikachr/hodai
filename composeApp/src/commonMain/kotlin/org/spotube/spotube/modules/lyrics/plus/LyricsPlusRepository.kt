@@ -57,8 +57,11 @@ class LyricsPlusRepository(
 
         // The layer toggles change the result, so they ride along in the
         // cache key: flipping a switch must not serve the other variant.
+        // The "v2" prefix orphans entries computed before the reading
+        // layer covered Korean and Mandarin: those entries stored a null
+        // reading for songs that can now produce one.
         val cacheLanguage =
-            "$appLanguage|r${if (romajiEnabled) 1 else 0}t${if (translationEnabled) 1 else 0}"
+            "v2|$appLanguage|r${if (romajiEnabled) 1 else 0}t${if (translationEnabled) 1 else 0}"
 
         var heldPlainCache: LyricsPlusResult? = null
         cache.read(track.id, cacheLanguage)?.let { entry ->
@@ -121,8 +124,8 @@ class LyricsPlusRepository(
 
         val songLanguage = LyricsLanguageDetector.detect(displayLines)
 
-        val romajiLines = if (romajiEnabled && songLanguage == "ja") {
-            romajiProvider.romajiFor(displayLines, songLanguage)
+        val romajiLines = if (romajiEnabled && songLanguage in ReadingRomanizer.SUPPORTED_LANGUAGES) {
+            ReadingRomanizer.romanize(displayLines, songLanguage, romajiProvider)
                 ?.takeIf { it.size == displayLines.size }
                 ?.map { it as String? }
         } else {

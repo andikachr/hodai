@@ -105,8 +105,8 @@
     <string name="settings_floating_lyrics_title">Lirik melayang</string>
     <string name="settings_floating_lyrics_subtitle">Tampilkan baris lirik yang sedang jalan di jendela kecil di atas aplikasi lain (desktop)</string>
     <string name="floating_lyrics_waiting">Putar lagu, baris liriknya muncul di sini</string>
-    <string name="settings_lyrics_romaji_title">Romaji untuk lagu Jepang</string>
-    <string name="settings_lyrics_romaji_subtitle">Tampilkan baris bacaan romaji di bawah lirik Jepang</string>
+    <string name="settings_lyrics_romaji_title">Cara baca untuk lagu Jepang, Korea, dan Mandarin</string>
+    <string name="settings_lyrics_romaji_subtitle">Tampilkan cara baca tiap baris (romaji, romanisasi, pinyin) di bawah liriknya</string>
     <string name="settings_lyrics_translation_title">Terjemahan lirik</string>
     <string name="settings_lyrics_translation_subtitle">Terjemahkan tiap baris ke bahasa aplikasi. Baris yang sudah berbahasa sama dibiarkan apa adanya</string>
     <string name="settings_section_downloads">Unduhan</string>
@@ -606,7 +606,7 @@
     <string name="collection_details_song_count">%1$d lagu</string>
     <string name="collection_details_duration_about_hr">sekitar %1$d jam %2$d mnt</string>
     <string name="collection_details_duration_about_min">sekitar %1$d mnt</string>
-    <string name="lyrics_pill_romaji">Romaji</string>
+    <string name="lyrics_pill_romaji">Cara Baca</string>
     <string name="lyrics_pill_translation">Terjemahan</string>
     <string name="lyrics_rail_repeat">Ulangi</string>
     <string name="lyrics_mode_synced">Tersinkron</string>

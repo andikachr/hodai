@@ -110,8 +110,8 @@
     <string name="settings_floating_lyrics_title">Floating lyrics</string>
     <string name="settings_floating_lyrics_subtitle">Show the current line in a small window above other apps (desktop)</string>
     <string name="floating_lyrics_waiting">Play a song and the line shows up here</string>
-    <string name="settings_lyrics_romaji_title">Romaji for Japanese songs</string>
-    <string name="settings_lyrics_romaji_subtitle">Show a romaji reading line under Japanese lyrics</string>
+    <string name="settings_lyrics_romaji_title">Reading aid for Japanese, Korean and Mandarin songs</string>
+    <string name="settings_lyrics_romaji_subtitle">Show how each line is read (romaji, romanization, pinyin) under the lyrics</string>
     <string name="settings_lyrics_translation_title">Lyric translations</string>
     <string name="settings_lyrics_translation_subtitle">Translate each line into the app language. Lines already in that language are left as they are</string>
     <string name="settings_section_downloads">Downloads</string>
@@ -794,7 +794,7 @@
     <string name="collection_details_song_count">%1$d songs</string>
     <string name="collection_details_duration_about_hr">about %1$d hr %2$d min</string>
     <string name="collection_details_duration_about_min">about %1$d min</string>
-    <string name="lyrics_pill_romaji">Romaji</string>
+    <string name="lyrics_pill_romaji">Reading</string>
     <string name="lyrics_pill_translation">Translation</string>
     <string name="lyrics_rail_repeat">Repeat</string>
     <string name="lyrics_mode_synced">Synced</string>

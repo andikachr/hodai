@@ -20,27 +20,29 @@ package org.spotube.spotube.modules.settings.sections
 import androidx.compose.foundation.lazy.LazyListScope
 import org.spotube.spotube.AppBuildInfo
 import org.spotube.spotube.modules.settings.components.SettingCardItem
-import org.spotube.spotube.openUrlInBrowser
-import org.spotube.spotube.resources.iconsax.CarbonGithubLogo
 import org.spotube.spotube.resources.iconsax.Iconsax
+import org.spotube.spotube.resources.iconsax.IconsaxDirectboxReceive
 import org.spotube.spotube.resources.iconsax.IconsaxInformation
+import org.spotube.spotube.resources.iconsax.IconsaxMicrophone
+import org.spotube.spotube.resources.iconsax.IconsaxMusicPlay
 import org.jetbrains.compose.resources.stringResource
 import spotube.composeapp.generated.resources.Res
 import spotube.composeapp.generated.resources.settings_about_description
-import spotube.composeapp.generated.resources.settings_about_licenses_subtitle
-import spotube.composeapp.generated.resources.settings_about_licenses_title
-import spotube.composeapp.generated.resources.settings_about_repository_subtitle
-import spotube.composeapp.generated.resources.settings_about_repository_title
+import spotube.composeapp.generated.resources.settings_about_feature_lyrics_subtitle
+import spotube.composeapp.generated.resources.settings_about_feature_lyrics_title
+import spotube.composeapp.generated.resources.settings_about_feature_offline_subtitle
+import spotube.composeapp.generated.resources.settings_about_feature_offline_title
+import spotube.composeapp.generated.resources.settings_about_feature_open_subtitle
+import spotube.composeapp.generated.resources.settings_about_feature_open_title
 import spotube.composeapp.generated.resources.settings_about_version
 import spotube.composeapp.generated.resources.settings_section_about
 import spotube.composeapp.generated.resources.welcome_app_name
 
 /**
- * About Hodai: app identity and version, a short description and a link to
- * the source repository. The AGPL credit stays one tap away under the
- * discreet open-source licenses entry (it opens the LICENSE file) instead of
- * sitting on the product's front face. Replaces the former Support section —
- * Hodai ships without donation destinations.
+ * About Hodai: app identity, version and a short description. Nothing else —
+ * the source-code and license links live in the Plugins (Advanced) section
+ * under "Source code". Replaces the former Support section — Hodai ships
+ * without donation destinations.
  */
 internal fun LazyListScope.aboutSection(
     includeHeader: Boolean = true) {
@@ -74,30 +76,36 @@ internal fun LazyListScope.aboutSection(
             },
             {
                 SettingCardItem(
-                    title = stringResource(Res.string.settings_about_licenses_title),
-                    subtitle = stringResource(Res.string.settings_about_licenses_subtitle),
+                    title = stringResource(Res.string.settings_about_feature_lyrics_title),
+                    subtitle = stringResource(Res.string.settings_about_feature_lyrics_subtitle),
                     icon = {
                         SettingsItemIcon(
-                            imageVector = Iconsax.IconsaxInformation,
+                            imageVector = Iconsax.IconsaxMicrophone,
                             contentDescription = stringResource(
-                                Res.string.settings_about_licenses_title))
-                    },
-                    onClick = {
-                        openUrlInBrowser(
-                            AppBuildInfo.REPOSITORY_URL + "/blob/master/LICENSE")
+                                Res.string.settings_about_feature_lyrics_title))
                     })
             },
             {
                 SettingCardItem(
-                    title = stringResource(Res.string.settings_about_repository_title),
-                    subtitle = stringResource(Res.string.settings_about_repository_subtitle),
+                    title = stringResource(Res.string.settings_about_feature_offline_title),
+                    subtitle = stringResource(Res.string.settings_about_feature_offline_subtitle),
                     icon = {
                         SettingsItemIcon(
-                            imageVector = Iconsax.CarbonGithubLogo,
+                            imageVector = Iconsax.IconsaxDirectboxReceive,
                             contentDescription = stringResource(
-                                Res.string.settings_about_repository_title))
-                    },
-                    onClick = { openUrlInBrowser(AppBuildInfo.REPOSITORY_URL) })
+                                Res.string.settings_about_feature_offline_title))
+                    })
+            },
+            {
+                SettingCardItem(
+                    title = stringResource(Res.string.settings_about_feature_open_title),
+                    subtitle = stringResource(Res.string.settings_about_feature_open_subtitle),
+                    icon = {
+                        SettingsItemIcon(
+                            imageVector = Iconsax.IconsaxMusicPlay,
+                            contentDescription = stringResource(
+                                Res.string.settings_about_feature_open_title))
+                    })
             })
     )
 }

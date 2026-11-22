@@ -162,14 +162,12 @@ fun SupportDialog(
 }
 
 /**
- * About Hodai: identity and version, a short description and a link to the
- * source repository. The AGPL credit is not on this front face; it lives one
- * tap away in the open-source licenses dialog, where the license requires it
- * to be reachable.
+ * About Hodai: identity, version and a short description. Nothing else —
+ * the source-code and license links live in Settings, inside the Plugins
+ * (Advanced) section, under "Source code".
  */
 @Composable
 private fun AboutHodaiDialog(onDismissRequest: () -> Unit) {
-    var showLicenses by remember { mutableStateOf(false) }
     MillenniumDialog(visible = true, onDismissRequest = onDismissRequest) {
         MillenniumDialogHeader {
             MillenniumDialogTitle(stringResource(Res.string.support_button_label))
@@ -184,51 +182,12 @@ private fun AboutHodaiDialog(onDismissRequest: () -> Unit) {
                 stringResource(Res.string.settings_about_description),
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colors.onSurface)
-            MillenniumButton(
-                onClick = {
-                    runCatching { openUrlInBrowser(AppBuildInfo.REPOSITORY_URL) }
-                    onDismissRequest()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                style = MillenniumButtonStyle.Secondary) {
-                Text(stringResource(Res.string.settings_about_repository_title))
-            }
-            MillenniumButton(
-                onClick = { showLicenses = true },
-                modifier = Modifier.fillMaxWidth(),
-                style = MillenniumButtonStyle.Quiet) {
-                Text(stringResource(Res.string.settings_about_licenses_title))
-            }
         }
         MillenniumDialogFooter {
             MillenniumButton(
                 onClick = onDismissRequest,
                 style = MillenniumButtonStyle.Quiet) {
                 Text(stringResource(Res.string.common_close))
-            }
-        }
-    }
-    if (showLicenses) {
-        MillenniumDialog(
-            visible = true,
-            onDismissRequest = { showLicenses = false }) {
-            MillenniumDialogHeader {
-                MillenniumDialogTitle(
-                    stringResource(Res.string.settings_about_licenses_title))
-                MillenniumDialogClose()
-            }
-            MillenniumDialogBody {
-                Text(
-                    stringResource(Res.string.settings_about_open_source_subtitle),
-                    style = AppTheme.typography.bodyMedium,
-                    color = AppTheme.colors.onSurface)
-            }
-            MillenniumDialogFooter {
-                MillenniumButton(
-                    onClick = { showLicenses = false },
-                    style = MillenniumButtonStyle.Quiet) {
-                    Text(stringResource(Res.string.common_close))
-                }
             }
         }
     }

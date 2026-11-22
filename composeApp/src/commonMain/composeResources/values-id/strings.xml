@@ -113,7 +113,13 @@
     <string name="settings_section_support">Dukungan</string>
     <string name="settings_section_about">Tentang</string>
     <string name="settings_about_version">Versi %1$s</string>
-    <string name="settings_about_description">Pemutar musik yang tidak menghalangi. Cari, tekan putar, dan dengarkan — tanpa akun, tanpa iklan, tanpa ribet.</string>
+    <string name="settings_about_description">Hodai muter musik yang kamu suka, tanpa semua hal yang biasanya ngerecokin. Cari lagu apa aja terus tekan putar — nggak perlu bikin akun, nggak ada iklan nyelip di antara lagu. Liriknya jalan bareng lagunya: lagu Jepang ada baris romajinya, dan tiap baris bisa diterjemahkan ke bahasamu sambil jalan. Unduh lagu buat di kereta, di pesawat, atau di mana aja sinyal nyerah.</string>
+    <string name="settings_about_feature_lyrics_title">Lirik yang ngikutin lagu</string>
+    <string name="settings_about_feature_lyrics_subtitle">Baris tersinkron dengan romaji buat lagu Jepang dan terjemahan per baris yang ngikutin bahasa aplikasimu</string>
+    <string name="settings_about_feature_offline_title">Offline pas kamu butuh</string>
+    <string name="settings_about_feature_offline_subtitle">Unduh lagu dan playlist, terus dengerin tanpa koneksi</string>
+    <string name="settings_about_feature_open_title">Tanpa akun, tanpa iklan</string>
+    <string name="settings_about_feature_open_subtitle">Buka aplikasi, langsung dengerin. Perpustakaan dan unduhanmu tersimpan di perangkatmu</string>
     <string name="settings_about_licenses_title">Lisensi sumber terbuka</string>
     <string name="settings_about_licenses_subtitle">Pemberitahuan untuk perangkat lunak sumber terbuka yang dipakai Hodai</string>
     <string name="settings_about_open_source_title">Sumber terbuka</string>

@@ -31,7 +31,10 @@ import compose.icons.feathericons.Package
 import org.spotube.spotube.core.navigation.NavigationCommands
 import org.spotube.spotube.core.navigation.Routes
 import spotube.composeapp.generated.resources.*
+import org.spotube.spotube.AppBuildInfo
 import org.spotube.spotube.modules.settings.components.SettingCardItem
+import org.spotube.spotube.openUrlInBrowser
+import org.spotube.spotube.resources.iconsax.CarbonGithubLogo
 import org.spotube.spotube.resources.iconsax.Iconsax
 import org.spotube.spotube.resources.iconsax.IconsaxBoxAdd
 import org.jetbrains.compose.resources.stringResource
@@ -41,28 +44,50 @@ internal fun LazyListScope.pluginsSection(
 ) {
     settingsSectionHeader(Res.string.settings_section_plugins)
     settingsSectionCard(
-        items = listOf {
-            SettingCardItem(
-                title = stringResource(Res.string.settings_plugins_manage_title),
-                subtitle = stringResource(Res.string.settings_plugins_manage_subtitle),
-                icon = {
-                    SettingsItemIcon(
-                        Iconsax.IconsaxBoxAdd,
-                        stringResource(Res.string.settings_section_plugins),
-                        Color(0xFFFF9800)
-                    )
-                },
-                trailingContent = {
-                    MillenniumIcon(
-                        imageVector = FeatherIcons.ChevronRight,
-                        contentDescription = stringResource(Res.string.settings_plugins_manage_title),
-                        tint = AppTheme.colors.onSurfaceVariant
-                    )
-                },
-                onClick = {
-                    navigatorCommands.navigateTo(Routes.Plugins)
-                }
-            )
-        }
+        items = listOf(
+            {
+                SettingCardItem(
+                    title = stringResource(Res.string.settings_plugins_manage_title),
+                    subtitle = stringResource(Res.string.settings_plugins_manage_subtitle),
+                    icon = {
+                        SettingsItemIcon(
+                            Iconsax.IconsaxBoxAdd,
+                            stringResource(Res.string.settings_section_plugins),
+                            Color(0xFFFF9800)
+                        )
+                    },
+                    trailingContent = {
+                        MillenniumIcon(
+                            imageVector = FeatherIcons.ChevronRight,
+                            contentDescription = stringResource(Res.string.settings_plugins_manage_title),
+                            tint = AppTheme.colors.onSurfaceVariant
+                        )
+                    },
+                    onClick = {
+                        navigatorCommands.navigateTo(Routes.Plugins)
+                    }
+                )
+            },
+            {
+                // The source-code and license links live here, tucked into
+                // the advanced section, instead of on the About face.
+                SettingCardItem(
+                    title = stringResource(Res.string.settings_about_repository_title),
+                    subtitle = stringResource(Res.string.settings_about_repository_subtitle),
+                    icon = {
+                        SettingsItemIcon(
+                            Iconsax.CarbonGithubLogo,
+                            stringResource(Res.string.settings_about_repository_title))
+                    },
+                    trailingContent = {
+                        MillenniumIcon(
+                            imageVector = FeatherIcons.ChevronRight,
+                            contentDescription = stringResource(Res.string.settings_about_repository_title),
+                            tint = AppTheme.colors.onSurfaceVariant
+                        )
+                    },
+                    onClick = { openUrlInBrowser(AppBuildInfo.REPOSITORY_URL) }
+                )
+            })
     )
 }

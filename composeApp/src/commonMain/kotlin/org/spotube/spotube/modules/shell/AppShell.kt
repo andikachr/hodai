@@ -157,31 +157,31 @@ fun AppShell(
                             .background(MillenniumTheme.colors.background)
                             .hazeSource(state = bgHazeState) // <-- Put it here!
                     )
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Row(modifier = Modifier.weight(1f)) {
-                            HodaiDarkRegion {
-                                AppSidebar(
-                                    navigator = navigator,
-                                    navigationState = navigationState
-                                )
-                            }
-                            MillenniumSeparator(
-                                modifier = Modifier.fillMaxHeight(),
-                                vertical = true
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        HodaiDarkRegion {
+                            AppSidebar(
+                                navigator = navigator,
+                                navigationState = navigationState
                             )
+                        }
+                        MillenniumSeparator(
+                            modifier = Modifier.fillMaxHeight(),
+                            vertical = true
+                        )
+                        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                             Box(
-                                modifier = Modifier.weight(1f).fillMaxHeight().hazeSource(hazeState)
+                                modifier = Modifier.weight(1f).fillMaxWidth().hazeSource(hazeState)
                             ) {
                                 content()
                             }
-                        }
-                        HodaiDarkRegion {
-                            AppLargePlayer(
-                                hazeState = hazeState,
-                                modifier = Modifier.fillMaxWidth(),
-                                onQueue = queueViewModel::toggleQueueVisibility,
-                                onAlternativeSource = alternativeViewModel::toggleAlternativeVisibility,
-                                onLyrics = { navigatorCommands.navigateTo(Routes.Lyrics) })
+                            HodaiDarkRegion {
+                                AppLargePlayer(
+                                    hazeState = hazeState,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onQueue = queueViewModel::toggleQueueVisibility,
+                                    onAlternativeSource = alternativeViewModel::toggleAlternativeVisibility,
+                                    onLyrics = { navigatorCommands.navigateTo(Routes.Lyrics) })
+                            }
                         }
                     }
 

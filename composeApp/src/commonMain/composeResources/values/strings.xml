@@ -124,7 +124,7 @@
     <string name="settings_section_support">Support</string>
     <string name="settings_section_about">About</string>
     <string name="settings_about_version">Version %1$s</string>
-    <string name="settings_about_description">Hodai is a music player. You search for a song, press play, and hear it, with no ads in between and no account to sign up for. Lyrics are synced to the song. Japanese songs include a romaji line under the original, and each line can be translated into the language your app is set to. You can also download songs and playlists to listen without a connection.</string>
+    <string name="settings_about_description">Hodai is a music player app. Its catalog comes from YouTube Music, so most songs you look for are here. Lyrics scroll along with the song as it plays. Japanese songs also show romaji under each line, which makes them easier to follow if you want to sing along. Each line can be translated into the language your app is set to. Songs and playlists can be downloaded for listening without a connection. There are no ads, and you don't need an account.</string>
     <string name="settings_about_feature_lyrics_title">Synced lyrics</string>
     <string name="settings_about_feature_lyrics_subtitle">Romaji under Japanese songs, and a translation of each line in your app language</string>
     <string name="settings_about_feature_offline_title">Offline listening</string>

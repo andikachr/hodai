@@ -53,6 +53,7 @@ import org.spotube.spotube.resources.iconsax.Iconsax
 import org.spotube.spotube.resources.iconsax.IconsaxAddSquare
 import org.jetbrains.compose.resources.stringResource
 import spotube.composeapp.generated.resources.Res
+import spotube.composeapp.generated.resources.media_playlist
 import spotube.composeapp.generated.resources.playlist_add_tracks_button
 import spotube.composeapp.generated.resources.playlist_loading_title
 import spotube.composeapp.generated.resources.playlist_owner_unknown

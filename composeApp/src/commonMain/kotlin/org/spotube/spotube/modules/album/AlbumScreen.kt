@@ -35,6 +35,7 @@ import org.jetbrains.compose.resources.stringResource
 import spotube.composeapp.generated.resources.Res
 import spotube.composeapp.generated.resources.album_loading_title
 import spotube.composeapp.generated.resources.media_unknown_artist
+import spotube.composeapp.generated.resources.player_track_details_album
 
 @Composable
 fun AlbumScreen(

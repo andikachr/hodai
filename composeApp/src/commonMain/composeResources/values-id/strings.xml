@@ -109,6 +109,9 @@
     <string name="settings_section_downloads">Unduhan</string>
     <string name="settings_section_caching">Cache</string>
     <string name="settings_section_desktop">Desktop</string>
+    <string name="settings_equalizer_title">Ekualizer</string>
+    <string name="settings_equalizer_subtitle">Atur karakter suara pakai preset VLC</string>
+    <string name="settings_equalizer_preset_title">Preset ekualizer</string>
     <string name="settings_section_updates">Pembaruan</string>
     <string name="settings_section_support">Dukungan</string>
     <string name="settings_section_about">Tentang</string>

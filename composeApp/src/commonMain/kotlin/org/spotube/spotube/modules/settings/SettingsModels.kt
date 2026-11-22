@@ -55,6 +55,10 @@ data class UserSettings(
     val lyricsRomajiEnabled: Boolean = true,
     val lyricsTranslationEnabled: Boolean = true,
 
+    // Desktop equalizer (VLC presets, applied by the JVM player)
+    val equalizerEnabled: Boolean = false,
+    val equalizerPreset: String = "Flat",
+
     // Remote Control (LAN)
     val allowRemoteControl: Boolean = false,
     val allowedRemoteDevices: List<String> = emptyList(),
@@ -123,3 +127,9 @@ internal fun defaultStreamingMusicFormat(): AudioFormat = AudioFormat(
         AudioQuality.Lossy(bitrate = 96_000),
         AudioQuality.Lossy(bitrate = 128_000),
         AudioQuality.Lossy(bitrate = 256_000)))
+
+/** LibVLC equalizer preset names, spelled the way LibVLC knows them. */
+val EQUALIZER_PRESETS: List<String> = listOf(
+    "Flat", "Classical", "Club", "Dance", "Full Bass", "Full Bass & Treble",
+    "Full Treble", "Headphones", "Large Hall", "Live", "Party", "Pop",
+    "Reggae", "Rock", "Ska", "Soft", "Soft Rock", "Techno")

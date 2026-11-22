@@ -19,11 +19,15 @@ package org.spotube.spotube.modules.settings.sections
 
 import androidx.compose.foundation.lazy.LazyListScope
 import spotube.composeapp.generated.resources.*
+import org.spotube.spotube.modules.settings.EQUALIZER_PRESETS
 import org.spotube.spotube.modules.settings.SettingsViewModel
 import org.spotube.spotube.modules.settings.UserSettings
+import org.spotube.spotube.modules.settings.components.SelectionSettingCard
 import org.spotube.spotube.modules.settings.components.SwitchSettingCard
 import org.spotube.spotube.resources.iconsax.Iconsax
 import org.spotube.spotube.resources.iconsax.IconsaxImportArrow2
+import org.spotube.spotube.resources.iconsax.IconsaxMusicPlay
+import org.spotube.spotube.resources.iconsax.IconsaxVerticalSetting
 import org.spotube.spotube.resources.iconsax.LineDiscord
 import org.jetbrains.compose.resources.stringResource
 
@@ -68,6 +72,47 @@ internal fun LazyListScope.desktopSection(
                     onCheckedChange = { enabled ->
                         settingsViewModel.updateSettings {
                             copy(discordRichPresence = enabled)
+                        }
+                    }
+                )
+            },
+            {
+                SwitchSettingCard(
+                    title = stringResource(Res.string.settings_equalizer_title),
+                    subtitle = stringResource(Res.string.settings_equalizer_subtitle),
+                    icon = {
+                        SettingsItemIcon(
+                            Iconsax.IconsaxMusicPlay,
+                            stringResource(Res.string.settings_equalizer_title)
+                        )
+                    },
+                    checked = settings.equalizerEnabled,
+                    onCheckedChange = { enabled ->
+                        settingsViewModel.updateSettings {
+                            copy(equalizerEnabled = enabled)
+                        }
+                    }
+                )
+            },
+            {
+                SelectionSettingCard(
+                    title = stringResource(Res.string.settings_equalizer_preset_title),
+                    subtitle = stringResource(
+                        Res.string.settings_subtitle_current,
+                        settings.equalizerPreset
+                    ),
+                    icon = {
+                        SettingsItemIcon(
+                            Iconsax.IconsaxVerticalSetting,
+                            stringResource(Res.string.settings_equalizer_preset_title)
+                        )
+                    },
+                    selectedOption = settings.equalizerPreset,
+                    options = EQUALIZER_PRESETS,
+                    optionLabel = { it },
+                    onOptionSelected = { preset ->
+                        settingsViewModel.updateSettings {
+                            copy(equalizerPreset = preset)
                         }
                     }
                 )

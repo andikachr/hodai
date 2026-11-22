@@ -114,6 +114,9 @@
     <string name="settings_section_downloads">Downloads</string>
     <string name="settings_section_caching">Caching</string>
     <string name="settings_section_desktop">Desktop</string>
+    <string name="settings_equalizer_title">Equalizer</string>
+    <string name="settings_equalizer_subtitle">Shape the sound with a VLC preset</string>
+    <string name="settings_equalizer_preset_title">Equalizer preset</string>
     <string name="settings_section_updates">Updates</string>
     <string name="settings_section_support">Support</string>
     <string name="settings_section_about">About</string>

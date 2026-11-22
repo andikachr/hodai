@@ -34,10 +34,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.spotube.spotube.modules.settings.SettingsProvider
 import org.spotube.spotube.core.DebugConfig
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
 import uk.co.caprica.vlcj.medialist.MediaList
+import uk.co.caprica.vlcj.player.base.Equalizer
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.base.State
 import uk.co.caprica.vlcj.player.component.AudioListPlayerComponent
@@ -53,6 +56,7 @@ actual class AudioPlayer actual constructor(context: Any) : AudioPlayerInterface
     actual val context: Any = context
 
     private val logger by injectLogger<AudioPlayer>()
+    private val settingsProvider: SettingsProvider by inject()
     private val lock = ReentrantLock()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -242,6 +246,38 @@ actual class AudioPlayer actual constructor(context: Any) : AudioPlayerInterface
 
         mediaListPlayer.list().setMediaList(mediaList.newMediaListRef())
         startPositionPolling()
+
+        // Hodai desktop equalizer: follow the settings toggle + preset.
+        scope.launch {
+            settingsProvider.settingsState.collect { settings ->
+                if (settings != null) {
+                    applyEqualizer(settings.equalizerEnabled, settings.equalizerPreset)
+                }
+            }
+        }
+    }
+
+    private var currentEqualizer: Equalizer? = null
+
+    /** Applies (or clears) the LibVLC equalizer on the media player. */
+    private fun applyEqualizer(enabled: Boolean, preset: String) {
+        try {
+            if (!enabled) {
+                mediaPlayer.audio().setEqualizer(null)
+                currentEqualizer?.release()
+                currentEqualizer = null
+                return
+            }
+            val equalizerApi = mediaPlayerFactory.equalizer()
+            val presetName = if (equalizerApi.presets().contains(preset)) preset else "Flat"
+            val next = equalizerApi.newEqualizer(presetName)
+            mediaPlayer.audio().setEqualizer(next)
+            currentEqualizer?.release()
+            currentEqualizer = next
+            logger.d { "Equalizer applied: $presetName" }
+        } catch (e: Exception) {
+            logger.d { "Equalizer failed: ${e.message}" }
+        }
     }
 
     actual override suspend fun play() {

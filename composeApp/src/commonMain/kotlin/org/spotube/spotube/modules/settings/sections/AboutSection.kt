@@ -27,8 +27,8 @@ import org.spotube.spotube.resources.iconsax.IconsaxInformation
 import org.jetbrains.compose.resources.stringResource
 import spotube.composeapp.generated.resources.Res
 import spotube.composeapp.generated.resources.settings_about_description
-import spotube.composeapp.generated.resources.settings_about_open_source_subtitle
-import spotube.composeapp.generated.resources.settings_about_open_source_title
+import spotube.composeapp.generated.resources.settings_about_licenses_subtitle
+import spotube.composeapp.generated.resources.settings_about_licenses_title
 import spotube.composeapp.generated.resources.settings_about_repository_subtitle
 import spotube.composeapp.generated.resources.settings_about_repository_title
 import spotube.composeapp.generated.resources.settings_about_version
@@ -36,9 +36,10 @@ import spotube.composeapp.generated.resources.settings_section_about
 import spotube.composeapp.generated.resources.welcome_app_name
 
 /**
- * About Hodai: app identity and version, a short description, the open-source
- * credit (the one place the upstream project is named, as the AGPL requires)
- * and a link to the source repository. Replaces the former Support section —
+ * About Hodai: app identity and version, a short description and a link to
+ * the source repository. The AGPL credit stays one tap away under the
+ * discreet open-source licenses entry (it opens the LICENSE file) instead of
+ * sitting on the product's front face. Replaces the former Support section —
  * Hodai ships without donation destinations.
  */
 internal fun LazyListScope.aboutSection(
@@ -73,13 +74,17 @@ internal fun LazyListScope.aboutSection(
             },
             {
                 SettingCardItem(
-                    title = stringResource(Res.string.settings_about_open_source_title),
-                    subtitle = stringResource(Res.string.settings_about_open_source_subtitle),
+                    title = stringResource(Res.string.settings_about_licenses_title),
+                    subtitle = stringResource(Res.string.settings_about_licenses_subtitle),
                     icon = {
                         SettingsItemIcon(
                             imageVector = Iconsax.IconsaxInformation,
                             contentDescription = stringResource(
-                                Res.string.settings_about_open_source_title))
+                                Res.string.settings_about_licenses_title))
+                    },
+                    onClick = {
+                        openUrlInBrowser(
+                            AppBuildInfo.REPOSITORY_URL + "/blob/master/LICENSE")
                     })
             },
             {

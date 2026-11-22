@@ -210,8 +210,8 @@ private fun PopularHeroContent(
             Coverflow(
                 state = state,
                 params = CoverflowParams(
-                    size = 0.68f,
-                    offset = 0.38f,
+                    size = 0.52f,
+                    offset = 0.5f,
                     angle = 12f,
                     shift = 0.255f,
                     zoom = 0.7864f,

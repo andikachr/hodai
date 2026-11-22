@@ -109,6 +109,8 @@
     <string name="settings_section_about">Tentang</string>
     <string name="settings_about_version">Versi %1$s</string>
     <string name="settings_about_description">Pemutar musik yang tidak menghalangi. Cari, tekan putar, dan dengarkan — tanpa akun, tanpa iklan, tanpa ribet.</string>
+    <string name="settings_about_licenses_title">Lisensi sumber terbuka</string>
+    <string name="settings_about_licenses_subtitle">Pemberitahuan untuk perangkat lunak sumber terbuka yang dipakai Hodai</string>
     <string name="settings_about_open_source_title">Sumber terbuka</string>
     <string name="settings_about_open_source_subtitle">Hodai dibangun di atas proyek sumber terbuka Spotube dan merupakan perangkat lunak bebas di bawah lisensi GNU AGPL v3.</string>
     <string name="settings_about_repository_title">Kode sumber</string>

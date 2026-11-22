@@ -25,6 +25,14 @@ import org.spotube.millennium.composables.MillenniumButton
 import org.spotube.millennium.composables.MillenniumButtonStyle
 import org.spotube.millennium.theme.MillenniumTheme
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -86,7 +94,8 @@ import org.spotube.spotube.getPlatform
 import org.spotube.spotube.modules.shell.LocalAppShellBottomInset
 import org.spotube.spotube.modules.support.LocalSupportPrompt
 import org.spotube.spotube.resources.iconsax.Iconsax
-import org.spotube.spotube.resources.iconsax.IconsaxHeart2
+import org.spotube.spotube.resources.iconsax.IconsaxInformation
+import org.spotube.spotube.resources.iconsax.IconsaxSearch
 import org.spotube.spotube.resources.iconsax.IconsaxMirroringScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -103,6 +112,7 @@ import org.jetbrains.compose.resources.Font
 import org.spotube.millennium.adaptive.WindowBreakpoints
 import org.spotube.spotube.resources.iconsax.IconsaxMirrorScreenRegular
 import spotube.composeapp.generated.resources.cookie_regular
+import spotube.composeapp.generated.resources.search_placeholder
 
 @Composable
 fun HomeScreen(viewModel: HomeScreenViewModel) {
@@ -159,7 +169,8 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                         color = AppTheme.colors.onSurface
                     )
                 } else {
-                    Text(stringResource(Res.string.home_title_browse))
+                    HomeSearchPill(
+                        onClick = { navigationCommands.navigateTo(Routes.Search) })
                 }
 
             },
@@ -189,7 +200,7 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                         style = MillenniumIconButtonStyle.Quiet
                     ) {
                         MillenniumIcon(
-                            imageVector = Iconsax.IconsaxHeart2,
+                            imageVector = Iconsax.IconsaxInformation,
                             contentDescription = supportLabel
                         )
                     }
@@ -238,6 +249,38 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
 }
 
 @Composable
+/**
+ * The locked mock's top-of-home search pill: a quiet inset capsule that
+ * opens the Search screen. Desktop only — small screens keep their icon
+ * actions in the main bar.
+ */
+@Composable
+private fun HomeSearchPill(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .width(380.dp)
+            .clip(CircleShape)
+            .background(MillenniumTheme.colors.inset)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        MillenniumIcon(
+            imageVector = Iconsax.IconsaxSearch,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = MillenniumTheme.colors.muted
+        )
+        Text(
+            text = stringResource(Res.string.search_placeholder),
+            style = AppTheme.typography.bodyMedium,
+            color = MillenniumTheme.colors.muted,
+            maxLines = 1
+        )
+    }
+}
+
 private fun HomeContent(
     listState: androidx.compose.foundation.lazy.LazyListState,
     state: HomeScreenState,

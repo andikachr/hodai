@@ -28,6 +28,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +55,7 @@ import org.spotube.millennium.composables.MillenniumIcon
 import spotube.composeapp.generated.resources.Res
 import spotube.composeapp.generated.resources.common_close
 import spotube.composeapp.generated.resources.settings_about_description
+import spotube.composeapp.generated.resources.settings_about_licenses_title
 import spotube.composeapp.generated.resources.settings_about_open_source_subtitle
 import spotube.composeapp.generated.resources.settings_about_repository_title
 import spotube.composeapp.generated.resources.settings_about_version
@@ -157,12 +162,14 @@ fun SupportDialog(
 }
 
 /**
- * About Hodai: identity and version, a short description, the open-source
- * credit (the one place the upstream project is named, as the AGPL requires)
- * and a link to the source repository.
+ * About Hodai: identity and version, a short description and a link to the
+ * source repository. The AGPL credit is not on this front face; it lives one
+ * tap away in the open-source licenses dialog, where the license requires it
+ * to be reachable.
  */
 @Composable
 private fun AboutHodaiDialog(onDismissRequest: () -> Unit) {
+    var showLicenses by remember { mutableStateOf(false) }
     MillenniumDialog(visible = true, onDismissRequest = onDismissRequest) {
         MillenniumDialogHeader {
             MillenniumDialogTitle(stringResource(Res.string.support_button_label))
@@ -177,10 +184,6 @@ private fun AboutHodaiDialog(onDismissRequest: () -> Unit) {
                 stringResource(Res.string.settings_about_description),
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colors.onSurface)
-            Text(
-                stringResource(Res.string.settings_about_open_source_subtitle),
-                style = AppTheme.typography.bodySmall,
-                color = AppTheme.colors.onSurfaceVariant)
             MillenniumButton(
                 onClick = {
                     runCatching { openUrlInBrowser(AppBuildInfo.REPOSITORY_URL) }
@@ -190,12 +193,42 @@ private fun AboutHodaiDialog(onDismissRequest: () -> Unit) {
                 style = MillenniumButtonStyle.Secondary) {
                 Text(stringResource(Res.string.settings_about_repository_title))
             }
+            MillenniumButton(
+                onClick = { showLicenses = true },
+                modifier = Modifier.fillMaxWidth(),
+                style = MillenniumButtonStyle.Quiet) {
+                Text(stringResource(Res.string.settings_about_licenses_title))
+            }
         }
         MillenniumDialogFooter {
             MillenniumButton(
                 onClick = onDismissRequest,
                 style = MillenniumButtonStyle.Quiet) {
                 Text(stringResource(Res.string.common_close))
+            }
+        }
+    }
+    if (showLicenses) {
+        MillenniumDialog(
+            visible = true,
+            onDismissRequest = { showLicenses = false }) {
+            MillenniumDialogHeader {
+                MillenniumDialogTitle(
+                    stringResource(Res.string.settings_about_licenses_title))
+                MillenniumDialogClose()
+            }
+            MillenniumDialogBody {
+                Text(
+                    stringResource(Res.string.settings_about_open_source_subtitle),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colors.onSurface)
+            }
+            MillenniumDialogFooter {
+                MillenniumButton(
+                    onClick = { showLicenses = false },
+                    style = MillenniumButtonStyle.Quiet) {
+                    Text(stringResource(Res.string.common_close))
+                }
             }
         }
     }

@@ -56,6 +56,7 @@ import org.spotube.spotube.modules.jam.JamViewModel
 import org.spotube.spotube.modules.downloads.DownloadManager
 import org.spotube.spotube.modules.downloads.DownloadsViewModel
 import org.spotube.spotube.modules.home.HomeScreenRepository
+import org.spotube.spotube.modules.home.RecentlyPlayedTracker
 import org.spotube.spotube.modules.home.HomeScreenViewModel
 import org.spotube.spotube.modules.plugin.MetadataAuthViewModel
 import org.spotube.spotube.modules.library.LibraryRepository
@@ -314,6 +315,9 @@ val sharedModules = module {
 
     // Scrobbling
     single { ScrobbleManager(get(), get(), get()) } withOptions { createdAtStart() }
+
+    // Recently played history (Hodai)
+    single { RecentlyPlayedTracker(get(), get()) } withOptions { createdAtStart() }
 
     factory { (tag: String?) ->
         if (tag != null) {

@@ -23,6 +23,7 @@ import org.spotube.plugin_interfaces.plugin_apis.metadata.browse.MetadataBrowseG
 import org.spotube.plugin_interfaces.plugin_apis.metadata.browse.MetadataBrowseItem
 import org.spotube.plugin_interfaces.plugin_apis.metadata.browse.MetadataBrowseSection
 import org.spotube.plugin_interfaces.plugin_apis.metadata.common.PaginationResult
+import org.spotube.plugin_interfaces.plugin_apis.metadata.track.MetadataTrack
 import org.spotube.plugin_interfaces.plugin_apis.metadata.common.PaginationStrategy
 import org.spotube.spotube.core.di.injectLogger
 import org.spotube.spotube.modules.plugin.PluginManager
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.spotube.spotube.core.i18n.getString
 import spotube.composeapp.generated.resources.Res
 import spotube.composeapp.generated.resources.common_unknown_error
@@ -82,6 +84,10 @@ class HomeScreenViewModel(
 
     private val state = MutableStateFlow<HomeScreenState>(HomeScreenState.Loading)
     val uiState = state.asStateFlow()
+
+    // Hodai: recently played history for the Home section.
+    private val recentlyPlayedTracker: RecentlyPlayedTracker by inject()
+    val recentlyPlayed: StateFlow<List<MetadataTrack>> get() = recentlyPlayedTracker.recents
 
     init {
         viewModelScope.launch {

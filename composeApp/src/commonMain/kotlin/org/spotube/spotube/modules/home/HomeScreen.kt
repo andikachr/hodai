@@ -69,6 +69,7 @@ import com.composeunstyled.currentWindowWidthBreakpoint
 import org.spotube.plugin_interfaces.plugin_apis.metadata.browse.MetadataBrowseGenre
 import org.spotube.plugin_interfaces.plugin_apis.metadata.browse.MetadataBrowseItem
 import org.spotube.plugin_interfaces.plugin_apis.metadata.browse.MetadataBrowseSection
+import org.spotube.plugin_interfaces.plugin_apis.metadata.track.MetadataTrack
 import org.spotube.spotube.PlatformType
 import org.spotube.spotube.core.ui.component.AlbumCard
 import org.spotube.spotube.core.ui.component.ApplicationMainBar
@@ -118,6 +119,7 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
     val openSupport = LocalSupportPrompt.current
     val isSmallScreen = currentWindowWidthBreakpoint() isBelow WindowBreakpoints.Medium
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val recentlyPlayed by viewModel.recentlyPlayed.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
     val selectedGenreId = when (val s = state) {
@@ -219,6 +221,7 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                 HomeContent(
                     listState = listState,
                     state = state,
+                    recentlyPlayed = recentlyPlayed,
                     onRetry = { viewModel.refresh() },
                     onGenreSelected = { viewModel.selectGenre(it) })
             } else {
@@ -232,6 +235,7 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                     HomeContent(
                         listState = listState,
                         state = state,
+                        recentlyPlayed = recentlyPlayed,
                         onRetry = { viewModel.refresh() },
                         onGenreSelected = { viewModel.selectGenre(it) })
                 }
@@ -282,6 +286,7 @@ private fun HomeSearchPill(onClick: () -> Unit) {
 private fun HomeContent(
     listState: androidx.compose.foundation.lazy.LazyListState,
     state: HomeScreenState,
+    recentlyPlayed: List<MetadataTrack>,
     onRetry: () -> Unit,
     onGenreSelected: (String) -> Unit
 ) {
@@ -361,6 +366,12 @@ private fun HomeContent(
                             selectedGenreId = state.selectedGenreId,
                             onGenreSelected = onGenreSelected
                         )
+                    }
+                }
+
+                if (recentlyPlayed.isNotEmpty()) {
+                    item {
+                        HomeRecentsSection(tracks = recentlyPlayed)
                     }
                 }
 
@@ -444,6 +455,39 @@ private fun HomeContent(
 }
 
 @Composable
+/** Hodai: the signed-in user's own listening history, replayable in one tap. */
+@Composable
+private fun HomeRecentsSection(
+    tracks: List<MetadataTrack>,
+    modifier: Modifier = Modifier
+) {
+    val rowState = rememberLazyListState()
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.home_recently_played),
+            style = AppTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        LazyRow(
+            state = rowState,
+            modifier = Modifier.dragScrollable(rowState),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            items(tracks, key = { it.id }) { track ->
+                TrackCard(track = track)
+            }
+        }
+    }
+}
+
 private fun HomeSection(
     title: String,
     subtitle: String? = null,

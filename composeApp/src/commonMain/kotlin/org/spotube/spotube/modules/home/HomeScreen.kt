@@ -26,12 +26,10 @@ import org.spotube.millennium.composables.MillenniumButtonStyle
 import org.spotube.millennium.theme.MillenniumTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -248,7 +246,6 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
     }
 }
 
-@Composable
 /**
  * The locked mock's top-of-home search pill: a quiet inset capsule that
  * opens the Search screen. Desktop only — small screens keep their icon
@@ -281,6 +278,7 @@ private fun HomeSearchPill(onClick: () -> Unit) {
     }
 }
 
+@Composable
 private fun HomeContent(
     listState: androidx.compose.foundation.lazy.LazyListState,
     state: HomeScreenState,

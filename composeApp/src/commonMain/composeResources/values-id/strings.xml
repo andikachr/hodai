@@ -119,7 +119,7 @@
     <string name="settings_section_support">Dukungan</string>
     <string name="settings_section_about">Tentang</string>
     <string name="settings_about_version">Versi %1$s</string>
-    <string name="settings_about_description">Pemutar YouTube Music yang simpel, buat HP dan komputer. Lagu langsung diputar, liriknya ikut tampil mengikuti lagu, dan unduhanmu siap diputar pas lagi nggak ada internet. Nggak ada iklan, nggak perlu akun.</string>
+    <string name="settings_about_description">Pemutar YouTube Music yang simpel, buat HP dan komputer. Login sekali, playlist YouTube-mu langsung muncul di sini juga. Nggak ada iklan.</string>
     <string name="settings_about_feature_lyrics_title">Lirik tersinkron</string>
     <string name="settings_about_feature_lyrics_subtitle">Romaji di bawah lirik lagu Jepang, dan terjemahan tiap baris dalam bahasa aplikasimu</string>
     <string name="settings_about_feature_offline_title">Dengerin offline</string>

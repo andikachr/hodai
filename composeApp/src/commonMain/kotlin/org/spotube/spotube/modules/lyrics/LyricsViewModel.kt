@@ -129,8 +129,14 @@ class LyricsViewModel(
                 // Lirik+: layered fallback coverage + romaji/translation
                 // layers, cached per track. Any failure inside resolves to
                 // null and the plugin result (if any) is used as-is.
+                val currentSettings = settingsProvider.settingsState.value
                 val plusResult = try {
-                    lyricsPlusRepository.resolve(track, pluginLyrics, effectiveAppLanguage())
+                    lyricsPlusRepository.resolve(
+                        track,
+                        pluginLyrics,
+                        effectiveAppLanguage(),
+                        romajiEnabled = currentSettings?.lyricsRomajiEnabled ?: true,
+                        translationEnabled = currentSettings?.lyricsTranslationEnabled ?: true)
                 } catch (e: Exception) {
                     null
                 }

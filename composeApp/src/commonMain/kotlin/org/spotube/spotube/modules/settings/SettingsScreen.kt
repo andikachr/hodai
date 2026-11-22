@@ -48,6 +48,7 @@ import org.spotube.spotube.modules.settings.sections.desktopSection
 import org.spotube.spotube.modules.settings.sections.downloadsSection
 import org.spotube.spotube.modules.settings.sections.jamSection
 import org.spotube.spotube.modules.settings.sections.languageRegionSection
+import org.spotube.spotube.modules.settings.sections.lyricsSection
 import org.spotube.spotube.modules.settings.sections.playbackSection
 import org.spotube.spotube.modules.settings.sections.pluginsSection
 import org.spotube.spotube.modules.settings.sections.aboutSection
@@ -139,6 +140,9 @@ private fun CompactSettingsContent(
                     settingsViewModel = settingsViewModel,
                     navigatorCommands = navigatorCommands,
                     requestLocalNetworkPermission = requestLocalNetworkPermission)
+                lyricsSection(
+                    settings = settings,
+                    settingsViewModel = settingsViewModel)
                 jamSection(
                     settings = settings,
                     navigationCommands = navigatorCommands)

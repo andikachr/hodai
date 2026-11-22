@@ -51,9 +51,16 @@ class LyricsPlusRepository(
     suspend fun resolve(
         track: MetadataTrack,
         primary: LyricsResponse?,
-        appLanguage: String): LyricsPlusResult? {
+        appLanguage: String,
+        romajiEnabled: Boolean = true,
+        translationEnabled: Boolean = true): LyricsPlusResult? {
 
-        cache.read(track.id, appLanguage)?.let { entry ->
+        // The layer toggles change the result, so they ride along in the
+        // cache key: flipping a switch must not serve the other variant.
+        val cacheLanguage =
+            "$appLanguage|r${if (romajiEnabled) 1 else 0}t${if (translationEnabled) 1 else 0}"
+
+        cache.read(track.id, cacheLanguage)?.let { entry ->
             return LyricsPlusResult(
                 syncedLyrics = entry.syncedLyrics,
                 plainLyrics = entry.plainLyrics,
@@ -78,7 +85,7 @@ class LyricsPlusRepository(
 
         val songLanguage = LyricsLanguageDetector.detect(displayLines)
 
-        val romajiLines = if (songLanguage == "ja") {
+        val romajiLines = if (romajiEnabled && songLanguage == "ja") {
             romajiProvider.romajiFor(displayLines, songLanguage)
                 ?.takeIf { it.size == displayLines.size }
                 ?.map { it as String? }
@@ -87,8 +94,18 @@ class LyricsPlusRepository(
         }
 
         val appPrimaryLanguage = appLanguage.substringBefore('-').lowercase()
-        val translationLines = if (songLanguage != appPrimaryLanguage) {
-            translator.translate(displayLines, appLanguage)
+        val translationLines = if (translationEnabled && songLanguage != appPrimaryLanguage) {
+            translator.translate(displayLines, appLanguage)?.mapIndexed { index, line ->
+                // A line already written in the app language comes back from
+                // the translator unchanged; showing it twice helps nobody.
+                if (line != null &&
+                    line.trim().equals(displayLines[index].trim(), ignoreCase = true)
+                ) {
+                    null
+                } else {
+                    line
+                }
+            }
         } else {
             null
         }
@@ -103,7 +120,7 @@ class LyricsPlusRepository(
         cache.write(
             LyricsPlusCacheEntry(
                 trackId = track.id,
-                targetLanguage = appLanguage,
+                targetLanguage = cacheLanguage,
                 songLanguage = songLanguage,
                 source = source,
                 syncedLyrics = response.syncedLyrics,

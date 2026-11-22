@@ -51,6 +51,10 @@ data class UserSettings(
     val enableEndlessPlayback: Boolean = true,
     val playbackProxyServerPort: Int = 14769,
 
+    // Lyrics Plus (Hodai layered lyrics: romaji + per-line translation)
+    val lyricsRomajiEnabled: Boolean = true,
+    val lyricsTranslationEnabled: Boolean = true,
+
     // Remote Control (LAN)
     val allowRemoteControl: Boolean = false,
     val allowedRemoteDevices: List<String> = emptyList(),

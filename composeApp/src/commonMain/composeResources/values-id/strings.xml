@@ -101,6 +101,11 @@
     <string name="settings_section_language_region">Bahasa dan Wilayah</string>
     <string name="settings_section_appearance">Tampilan</string>
     <string name="settings_section_playback">Pemutaran</string>
+    <string name="settings_section_lyrics">Lirik</string>
+    <string name="settings_lyrics_romaji_title">Romaji untuk lagu Jepang</string>
+    <string name="settings_lyrics_romaji_subtitle">Tampilkan baris bacaan romaji di bawah lirik Jepang</string>
+    <string name="settings_lyrics_translation_title">Terjemahan lirik</string>
+    <string name="settings_lyrics_translation_subtitle">Terjemahkan tiap baris ke bahasa aplikasi. Baris yang sudah berbahasa sama dibiarkan apa adanya</string>
     <string name="settings_section_downloads">Unduhan</string>
     <string name="settings_section_caching">Cache</string>
     <string name="settings_section_desktop">Desktop</string>

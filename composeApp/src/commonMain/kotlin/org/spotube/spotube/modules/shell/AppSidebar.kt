@@ -63,7 +63,7 @@ import org.spotube.spotube.modules.library.LibraryState
 import org.spotube.spotube.modules.library.LibraryTab
 import org.spotube.spotube.modules.support.LocalSupportPrompt
 import org.spotube.spotube.resources.iconsax.Iconsax
-import org.spotube.spotube.resources.iconsax.IconsaxHeart2
+import org.spotube.spotube.resources.iconsax.IconsaxInformation
 import org.spotube.spotube.resources.iconsax.IconsaxSetting2
 import org.spotube.spotube.resources.iconsax.IconsaxSidebarLeftBroken
 import org.spotube.spotube.resources.iconsax.IconsaxSidebarRightBroken
@@ -209,7 +209,7 @@ fun AppSidebar(
                 label = supportLabel,
                 onClick = { openSupport() },
                 contentDescription = supportLabel,
-                icon = Iconsax.IconsaxHeart2
+                icon = Iconsax.IconsaxInformation
             )
             MillenniumSidebarItem(
                 label = stringResource(Res.string.settings_screen_title),

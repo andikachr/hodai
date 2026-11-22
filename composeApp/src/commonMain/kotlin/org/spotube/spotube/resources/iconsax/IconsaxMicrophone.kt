@@ -17,9 +17,6 @@
 
 package org.spotube.spotube.resources.iconsax
 
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
@@ -55,26 +52,39 @@ val Iconsax.IconsaxMicrophone: ImageVector
                     close()
                 }
             ) {
-                // Capsule.
+                // Capsule: a stadium (two semicircle caps joined by straight
+                // sides), drawn with the vector builder's SVG-style arcs —
+                // the builder has no addRoundRect.
                 path(fill = SolidColor(Color.White)) {
-                    addRoundRect(RoundRect(9f, 2f, 15f, 14f, CornerRadius(3f, 3f)))
+                    moveTo(9f, 5f)
+                    arcTo(3f, 3f, 0f, isMoreThanHalf = false, isPositiveArc = true, 15f, 5f)
+                    lineTo(15f, 11f)
+                    arcTo(3f, 3f, 0f, isMoreThanHalf = false, isPositiveArc = true, 9f, 11f)
+                    close()
                 }
                 // Cradle: a U-shaped band under the capsule (outer arc swept
-                // clockwise, inner arc swept back, even-odd keeps the band).
+                // one way, inner arc swept back, even-odd keeps the band).
                 path(
                     fill = SolidColor(Color.White),
                     pathFillType = PathFillType.EvenOdd
                 ) {
-                    moveTo(19f, 10f)
-                    arcTo(Rect(5f, 3f, 19f, 17f), 0f, 180f, false)
-                    lineTo(7f, 10f)
-                    arcTo(Rect(7f, 5f, 17f, 15f), 180f, -180f, false)
+                    moveTo(5f, 10f)
+                    arcTo(7f, 7f, 0f, isMoreThanHalf = false, isPositiveArc = false, 19f, 10f)
+                    lineTo(17f, 10f)
+                    arcTo(5f, 5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 7f, 10f)
                     close()
                 }
-                // Stem and foot.
+                // Stem and foot as one T outline.
                 path(fill = SolidColor(Color.White)) {
-                    addRoundRect(RoundRect(11f, 16f, 13f, 20f, CornerRadius(1f, 1f)))
-                    addRoundRect(RoundRect(8f, 20f, 16f, 22f, CornerRadius(1f, 1f)))
+                    moveTo(11f, 16f)
+                    lineTo(13f, 16f)
+                    lineTo(13f, 20f)
+                    lineTo(16f, 20f)
+                    lineTo(16f, 22f)
+                    lineTo(8f, 22f)
+                    lineTo(8f, 20f)
+                    lineTo(11f, 20f)
+                    close()
                 }
             }
         }.build()

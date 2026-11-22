@@ -19,6 +19,7 @@ package org.spotube.spotube.modules.lyrics.plus
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.http.takeFrom
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive

@@ -143,17 +143,18 @@ private fun PopularHeroContent(
                         scaleX = 1.18f
                         scaleY = 1.18f
                     }
-                    .blur(24.dp),
+                    .blur(14.dp),
                 contentScale = ContentScale.Crop
             )
         }
 
-        // Darken the artwork, then fade it into the brand green from the left
-        // so the text block stays readable (mock .herofade stops: .96/.55/.12).
+        // Lightly darken the artwork, then fade it into the brand green from
+        // the left so the text block stays readable while the cover still
+        // reads through (owner: same lighter blur as the lyrics stage).
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.22f))
+                .background(Color.Black.copy(alpha = 0.10f))
         )
         Box(
             modifier = Modifier
@@ -161,9 +162,9 @@ private fun PopularHeroContent(
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            AppTheme.colors.background.copy(alpha = 0.96f),
-                            AppTheme.colors.background.copy(alpha = 0.55f),
-                            AppTheme.colors.background.copy(alpha = 0.12f)
+                            AppTheme.colors.background.copy(alpha = 0.88f),
+                            AppTheme.colors.background.copy(alpha = 0.38f),
+                            AppTheme.colors.background.copy(alpha = 0.05f)
                         )
                     )
                 )

@@ -248,7 +248,7 @@ fun AppLargePlayer(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -268,6 +268,9 @@ fun AppLargePlayer(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
+                        if (playerUiState.isPlaying) {
+                            PlayingCoverOverlay()
+                        }
                     }
                     Column(
                         modifier = Modifier
@@ -296,109 +299,111 @@ fun AppLargePlayer(
                     )
                 }
 
-                Column(
-                    modifier = Modifier.weight(1.1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Row(
+                    modifier = Modifier
+                        .weight(1.6f)
+                        .padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    MillenniumSlider(
-                        value = seekProgress,
-                        onValueChange = {
-                            seekProgress = it
-                            isSeeking = true
-                        },
-                        onValueChangeFinished = {
-                            isSeeking = false
-                            onSeekFinished()
-                        },
-                        enabled = playerUiState.seekDuration.inWholeMilliseconds > 0L,
-                        label = stringResource(Res.string.player_seek_label),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    MillenniumIconButton(
+                        onClick = ::onShuffleToggle,
+                        enabled = !isJamGuest,
+                        style = if (playerUiState.isShuffling) MillenniumIconButtonStyle.Secondary else MillenniumIconButtonStyle.Quiet
                     ) {
-                        Text(
-                            text = formatPlayerTime(playerUiState.position),
-                            style = AppTheme.typography.labelSmall,
-                            color = AppTheme.colors.onSurfaceVariant
-                        )
-                        Text(
-                            text = formatPlayerTime(playerUiState.displayDuration),
-                            style = AppTheme.typography.labelSmall,
-                            color = AppTheme.colors.onSurfaceVariant
+                        MillenniumIcon(
+                            Iconsax.IconsaxShuffle,
+                            contentDescription = stringResource(if (playerUiState.isShuffling) Res.string.player_disable_shuffle_content_description else Res.string.player_enable_shuffle_content_description),
+                            tint = if (playerUiState.isShuffling) {
+                                AppTheme.colors.primary
+                            } else {
+                                AppTheme.colors.onSurfaceVariant
+                            }
                         )
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
+                    MillenniumIconButton(
+                        onClick = ::onSkipPrevious,
+                        enabled = !isJamGuest,
+                        style = MillenniumIconButtonStyle.Quiet
                     ) {
-                        MillenniumIconButton(
-                            onClick = ::onShuffleToggle,
-                            enabled = !isJamGuest,
-                            style = if (playerUiState.isShuffling) MillenniumIconButtonStyle.Secondary else MillenniumIconButtonStyle.Quiet
+                        MillenniumIcon(Iconsax.IconsaxPrevious, contentDescription = stringResource(Res.string.player_previous_content_description))
+                    }
+                    MillenniumIconButton(
+                        onClick = ::onPlayPause,
+                        style = MillenniumIconButtonStyle.Primary
+                    ) {
+                        MillenniumIcon(
+                            if (playerUiState.isPlaying) Iconsax.IconsaxPause else Iconsax.IconsaxPlay,
+                            contentDescription = stringResource(if (playerUiState.isPlaying) Res.string.player_pause_content_description else Res.string.player_play_or_pause_content_description),
+                            tint = LocalTextStyle.current.color
+                        )
+                    }
+                    MillenniumIconButton(
+                        onClick = ::onSkipNext,
+                        enabled = !isJamGuest,
+                        style = MillenniumIconButtonStyle.Quiet
+                    ) {
+                        MillenniumIcon(Iconsax.IconsaxNext, contentDescription = stringResource(Res.string.player_next_content_description))
+                    }
+                    MillenniumIconButton(
+                        onClick = ::onLoopToggle,
+                        enabled = !isJamGuest,
+                        style = if (playerUiState.loopState == LoopState.NONE) MillenniumIconButtonStyle.Quiet else MillenniumIconButtonStyle.Secondary
+                    ) {
+                        MillenniumIcon(
+                            imageVector = when (playerUiState.loopState) {
+                                LoopState.NONE -> Iconsax.IconsaxRepeateMusic
+                                LoopState.ONE -> Iconsax.IconsaxRepeateOne
+                                LoopState.ALL -> Iconsax.IconsaxRepeatMusic
+                            },
+                            contentDescription = stringResource(when (playerUiState.loopState) { LoopState.NONE -> Res.string.player_loop_mode_none; LoopState.ONE -> Res.string.player_loop_mode_one; LoopState.ALL -> Res.string.player_loop_mode_all }),
+                            tint = if (playerUiState.loopState == LoopState.NONE) {
+                                AppTheme.colors.onSurfaceVariant
+                            } else {
+                                AppTheme.colors.primary
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        SpectrumSeekBar(
+                            progress = seekProgress,
+                            isPlaying = playerUiState.isPlaying,
+                            enabled = playerUiState.seekDuration.inWholeMilliseconds > 0L,
+                            seedKey = playerUiState.title,
+                            onSeekChange = {
+                                seekProgress = it
+                                isSeeking = true
+                            },
+                            onSeekFinished = {
+                                isSeeking = false
+                                onSeekFinished()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            barHeight = 26.dp
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            MillenniumIcon(
-                                Iconsax.IconsaxShuffle,
-                                contentDescription = stringResource(if (playerUiState.isShuffling) Res.string.player_disable_shuffle_content_description else Res.string.player_enable_shuffle_content_description),
-                                tint = if (playerUiState.isShuffling) {
-                                    AppTheme.colors.primary
-                                } else {
-                                    AppTheme.colors.onSurfaceVariant
-                                }
+                            Text(
+                                text = formatPlayerTime(playerUiState.position),
+                                style = AppTheme.typography.labelSmall,
+                                color = AppTheme.colors.onSurfaceVariant
                             )
-                        }
-                        MillenniumIconButton(
-                            onClick = ::onSkipPrevious,
-                            enabled = !isJamGuest,
-                            style = MillenniumIconButtonStyle.Quiet
-                        ) {
-                            MillenniumIcon(Iconsax.IconsaxPrevious, contentDescription = stringResource(Res.string.player_previous_content_description))
-                        }
-                        MillenniumIconButton(
-                            onClick = ::onPlayPause,
-                            style = MillenniumIconButtonStyle.Primary
-                        ) {
-                            MillenniumIcon(
-                                if (playerUiState.isPlaying) Iconsax.IconsaxPause else Iconsax.IconsaxPlay,
-                                contentDescription = stringResource(if (playerUiState.isPlaying) Res.string.player_pause_content_description else Res.string.player_play_or_pause_content_description),
-                                tint = LocalTextStyle.current.color
-                            )
-                        }
-                        MillenniumIconButton(
-                            onClick = ::onSkipNext,
-                            enabled = !isJamGuest,
-                            style = MillenniumIconButtonStyle.Quiet
-                        ) {
-                            MillenniumIcon(Iconsax.IconsaxNext, contentDescription = stringResource(Res.string.player_next_content_description))
-                        }
-                        MillenniumIconButton(
-                            onClick = ::onLoopToggle,
-                            enabled = !isJamGuest,
-                            style = if (playerUiState.loopState == LoopState.NONE) MillenniumIconButtonStyle.Quiet else MillenniumIconButtonStyle.Secondary
-                        ) {
-                            MillenniumIcon(
-                                imageVector = when (playerUiState.loopState) {
-                                    LoopState.NONE -> Iconsax.IconsaxRepeateMusic
-                                    LoopState.ONE -> Iconsax.IconsaxRepeateOne
-                                    LoopState.ALL -> Iconsax.IconsaxRepeatMusic
-                                },
-                                contentDescription = stringResource(when (playerUiState.loopState) { LoopState.NONE -> Res.string.player_loop_mode_none; LoopState.ONE -> Res.string.player_loop_mode_one; LoopState.ALL -> Res.string.player_loop_mode_all }),
-                                tint = if (playerUiState.loopState == LoopState.NONE) {
-                                    AppTheme.colors.onSurfaceVariant
-                                } else {
-                                    AppTheme.colors.primary
-                                }
+                            Text(
+                                text = formatPlayerTime(playerUiState.displayDuration),
+                                style = AppTheme.typography.labelSmall,
+                                color = AppTheme.colors.onSurfaceVariant
                             )
                         }
                     }
                 }
 
-                Column(
+                Row(
                     modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.End
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         MillenniumIconButton(
@@ -514,7 +519,7 @@ fun AppLargePlayer(
                                 }
                             },
                             label = stringResource(Res.string.player_volume_label),
-                            modifier = Modifier.fillMaxWidth(0.62f)
+                            modifier = Modifier.width(96.dp)
                         )
                     }
                 }

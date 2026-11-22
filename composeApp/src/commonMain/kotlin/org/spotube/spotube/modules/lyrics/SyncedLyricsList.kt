@@ -18,12 +18,19 @@
 package org.spotube.spotube.modules.lyrics
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,8 +45,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
@@ -125,36 +134,50 @@ fun SyncedLyricsList(
                         onClick = { onLineClick(line) }
                     )
                 } else {
+                    // Passive preview (expanded player): the same focus
+                    // language as the stage — left-aligned, lines fall off
+                    // with distance, layers only near the active line.
+                    val distance = kotlin.math.abs(index - currentIndex)
+                    val passiveAlpha = when (distance) {
+                        0 -> 1f
+                        1 -> 0.65f
+                        2 -> 0.45f
+                        else -> 0.3f
+                    }
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .graphicsLayer { this.alpha = passiveAlpha }
                             .padding(horizontal = 8.dp, vertical = 2.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.Start
                     ) {
                         Text(
                             text = text,
-                            style = AppTheme.typography.bodyMedium.copy(
+                            style = (
+                                if (isCurrent) AppTheme.typography.bodyLarge
+                                else AppTheme.typography.bodyMedium
+                                ).copy(
                                 fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
                                 color = color
                             ),
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.Start,
                             maxLines = 2
                         )
-                        if (romaji != null) {
+                        if (distance <= 2 && romaji != null) {
                             Text(
                                 text = romaji,
                                 style = AppTheme.typography.bodySmall.copy(
-                                    color = color.copy(alpha = 0.75f)
+                                    color = colors.accent.copy(alpha = 0.8f)
                                 ),
-                                textAlign = TextAlign.Center,
+                                textAlign = TextAlign.Start,
                                 maxLines = 2
                             )
                         }
-                        if (translation != null) {
+                        if (distance <= 2 && translation != null) {
                             Text(
                                 text = translation,
                                 style = AppTheme.typography.bodySmall.copy(color = color),
-                                textAlign = TextAlign.Center,
+                                textAlign = TextAlign.Start,
                                 maxLines = 2
                             )
                         }
@@ -165,6 +188,13 @@ fun SyncedLyricsList(
     }
 }
 
+/**
+ * One line on the premium lyrics stage (owner-locked mock): left-aligned,
+ * the active line stands large with a gold focus bar, its romaji in gold and
+ * its translation just under; lines fall off in opacity with distance, the
+ * far ones blur, and the romaji/translation layers only stay sharp near the
+ * active line.
+ */
 @Composable
 private fun ImmersiveLyricLine(
     text: String,
@@ -179,23 +209,21 @@ private fun ImmersiveLyricLine(
     val hovered by interaction.collectIsHoveredAsState()
     val targetAlpha = when (distance) {
         0 -> 1f
-        1 -> 0.7f
-        2 -> 0.5f
-        else -> 0.32f
+        1 -> 0.62f
+        2 -> 0.45f
+        else -> 0.3f
     }
     val alpha by animateFloatAsState(targetAlpha, tween(300))
-    val scale by animateFloatAsState(if (isCurrent) 1f else 0.9f, tween(300))
-    val color by animateColorAsState(if (isCurrent) colors.accent else colors.text, tween(300))
     val hoverBackground by animateColorAsState(
         if (hovered && !isCurrent) colors.accent.copy(alpha = 0.10f) else Color.Transparent
     )
 
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .blur(if (distance >= 3) 1.5.dp else 0.dp)
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
                 this.alpha = if (hovered) maxOf(alpha, 0.85f) else alpha
             }
             .clip(RoundedCornerShape(14.dp))
@@ -204,33 +232,51 @@ private fun ImmersiveLyricLine(
             .pointerHoverIcon(PointerIcon.Hand)
             .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = text,
-            style = AppTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = color
-            ),
-            textAlign = TextAlign.Center
+        Box(
+            modifier = Modifier
+                .width(5.dp)
+                .fillMaxHeight()
+                .clip(CircleShape)
+                .background(if (isCurrent) colors.accent else Color.Transparent)
         )
-        if (romaji != null) {
+        Spacer(Modifier.width(16.dp))
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.Start
+        ) {
             Text(
-                text = romaji,
-                modifier = Modifier.padding(top = 3.dp),
-                style = AppTheme.typography.bodyMedium.copy(color = colors.muted),
-                textAlign = TextAlign.Center
-            )
-        }
-        if (translation != null) {
-            Text(
-                text = translation,
-                modifier = Modifier.padding(top = 3.dp),
-                style = AppTheme.typography.bodyLarge.copy(
-                    color = color.copy(alpha = 0.85f)
+                text = text,
+                style = (
+                    if (isCurrent) AppTheme.typography.headlineMedium
+                    else AppTheme.typography.headlineSmall
+                    ).copy(
+                    fontWeight = FontWeight.Bold,
+                    color = colors.text
                 ),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Start
             )
+            if (distance <= 2 && romaji != null) {
+                Text(
+                    text = romaji,
+                    modifier = Modifier.padding(top = 3.dp),
+                    style = AppTheme.typography.bodyMedium.copy(
+                        color = colors.accent.copy(alpha = 0.9f)
+                    ),
+                    textAlign = TextAlign.Start
+                )
+            }
+            if (distance <= 2 && translation != null) {
+                Text(
+                    text = translation,
+                    modifier = Modifier.padding(top = 3.dp),
+                    style = AppTheme.typography.bodyLarge.copy(
+                        color = colors.text.copy(alpha = 0.78f)
+                    ),
+                    textAlign = TextAlign.Start
+                )
+            }
         }
     }
 }

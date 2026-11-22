@@ -61,6 +61,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -99,6 +101,28 @@ fun LyricsScreen(
             )
     ) {
         val isWide = maxWidth >= 840.dp
+
+        // Premium lyrics stage (owner-locked mock): the current cover,
+        // blurred into a backdrop and calmed by a deep veil, so the stage
+        // glows with the song instead of sitting on a flat panel.
+        AsyncImage(
+            model = uiState.coverUrl.takeIf { it.isNotBlank() },
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = 1.35f
+                    scaleY = 1.35f
+                    alpha = 0.55f
+                }
+                .blur(56.dp),
+            contentScale = ContentScale.Crop
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(colors.background.copy(alpha = 0.72f))
+        )
 
         Column(Modifier.fillMaxSize()) {
             Row(

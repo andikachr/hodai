@@ -61,12 +61,25 @@ class LyricsPlusRepository(
             "$appLanguage|r${if (romajiEnabled) 1 else 0}t${if (translationEnabled) 1 else 0}"
 
         cache.read(track.id, cacheLanguage)?.let { entry ->
-            return LyricsPlusResult(
-                syncedLyrics = entry.syncedLyrics,
-                plainLyrics = entry.plainLyrics,
-                songLanguage = entry.songLanguage,
-                romajiLines = entry.romajiLines,
-                translationLines = entry.translationLines)
+            // The cached layers were computed over the cached lyrics text.
+            // If the plugin now serves a different edit of the same song
+            // (lines split or joined differently), serving the cache would
+            // pair those layers with lines they were never aligned to —
+            // the one-line translation drift. Recompute instead.
+            val cachedLines = entry.syncedLyrics?.map { it.text }
+                ?: entry.plainLyrics?.split("\n")
+            val primaryLines = primary?.syncedLyrics?.map { it.text }
+                ?: primary?.plainLyrics?.split("\n")
+            if (primaryLines == null || cachedLines == null ||
+                primaryLines == cachedLines
+            ) {
+                return LyricsPlusResult(
+                    syncedLyrics = entry.syncedLyrics,
+                    plainLyrics = entry.plainLyrics,
+                    songLanguage = entry.songLanguage,
+                    romajiLines = entry.romajiLines,
+                    translationLines = entry.translationLines)
+            }
         }
 
         var source = SOURCE_PLUGIN

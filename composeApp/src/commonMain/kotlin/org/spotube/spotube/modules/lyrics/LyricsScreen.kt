@@ -67,6 +67,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -120,6 +121,11 @@ fun LyricsScreen(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
+            // The blurred backdrop below is scaled past its bounds to hide
+            // the blur's soft edges; without clipping, that oversized layer
+            // paints over the sidebar (the milky strip the owner kept
+            // seeing). Clip the whole stage to its own bounds.
+            .clipToBounds()
             .background(
                 Brush.verticalGradient(
                     0f to colors.accent.copy(alpha = 0.14f),
@@ -143,13 +149,13 @@ fun LyricsScreen(
                     scaleY = 1.15f
                     alpha = 0.75f
                 }
-                .blur(28.dp),
+                .blur(22.dp),
             contentScale = ContentScale.Crop
         )
         Box(
             Modifier
                 .fillMaxSize()
-                .background(colors.background.copy(alpha = 0.58f))
+                .background(colors.background.copy(alpha = 0.55f))
         )
 
         Column(Modifier.fillMaxSize()) {

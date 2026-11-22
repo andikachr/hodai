@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -107,7 +108,7 @@ fun CollectionDetails(
     eyebrow: String? = null,
     /** Extra meta after the owner name, e.g. "24 songs · about 1 hr 40 min". */
     metaText: String? = null) {
-    Box(modifier = modifier.fillMaxWidth()) {
+    Box(modifier = modifier.fillMaxWidth().clipToBounds()) {
         val isCompact = currentWindowWidthBreakpoint() isBelow WindowBreakpoints.Medium
 
         val sharedTransitionScope = LocalSharedTransitionScope.current

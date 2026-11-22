@@ -128,7 +128,11 @@ class LyricsViewModel(
 
     private var currentTrackId: String? = null
 
+    /** True once the user picks a lyrics mode by hand for the current track. */
+    private var modeManuallySet = false
+
     fun setMode(mode: LyricType) {
+        modeManuallySet = true
         _uiState.update { it.copy(mode = mode) }
     }
 
@@ -147,6 +151,9 @@ class LyricsViewModel(
                 return@launch
             }
 
+            if (currentTrackId != track.id) {
+                modeManuallySet = false
+            }
             currentTrackId = track.id
             _uiState.update {
                 it.copy(
@@ -191,14 +198,40 @@ class LyricsViewModel(
 
                 if (currentTrackId != track.id) return@launch
 
+                // The Lirik+ layers are aligned with the plus result's own
+                // lyrics text, so when a plus result exists its lyrics are
+                // the display set as a whole. Mixing the plugin's synced
+                // lines with layers computed over a different edit of the
+                // lyrics is what shifted translations by a line.
+                val displaySynced = if (plusResult != null) {
+                    plusResult.syncedLyrics
+                } else {
+                    pluginLyrics?.syncedLyrics
+                }
+                val displayPlain = if (plusResult != null) {
+                    plusResult.plainLyrics
+                } else {
+                    pluginLyrics?.plainLyrics
+                }
+
                 _uiState.update {
                     it.copy(
-                        syncedLyrics = plusResult?.syncedLyrics ?: pluginLyrics?.syncedLyrics,
-                        plainLyrics = plusResult?.plainLyrics ?: pluginLyrics?.plainLyrics,
+                        syncedLyrics = displaySynced,
+                        plainLyrics = displayPlain,
                         romajiLines = plusResult?.romajiLines,
                         translationLines = plusResult?.translationLines,
                         romajiEnabled = useRomaji,
                         translationEnabled = useTranslation,
+                        // Unless the user picked a mode for this track, open
+                        // on the synced stage when synced lines exist and on
+                        // the plain page otherwise (never a blank stage).
+                        mode = if (modeManuallySet) {
+                            it.mode
+                        } else if (displaySynced != null) {
+                            LyricType.SYNCED
+                        } else {
+                            LyricType.STATIC
+                        },
                         isLoading = false,
                         isSearchingFallback = false)
                 }

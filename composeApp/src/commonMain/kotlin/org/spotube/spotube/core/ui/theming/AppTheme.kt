@@ -35,19 +35,29 @@ import androidx.compose.ui.unit.sp
 
 import org.spotube.spotube.modules.settings.Theme
 import org.spotube.spotube.modules.settings.UserSettings
+import org.jetbrains.compose.resources.Font
 import org.spotube.millennium.composables.MillenniumModalBottomSheetTheme
+import org.spotube.millennium.composables.MillenniumTextTheme
 import org.spotube.millennium.composables.MillenniumTooltipHost
+import org.spotube.millennium.composables.defaultMillenniumTextTheme
 import org.spotube.millennium.composables.MillenniumTopAppBarTheme
 import org.spotube.millennium.composables.MillenniumTopAppBarThemeProperties
 import org.spotube.millennium.composables.defaultMillenniumModalBottomSheetTheme
 import org.spotube.millennium.composables.defaultMillenniumTopAppBarTheme
 import org.spotube.millennium.theme.MillenniumColorSchemes
 import org.spotube.millennium.theme.MillenniumColors
+import org.spotube.millennium.theme.MillenniumControlStateProperty
 import org.spotube.millennium.theme.MillenniumDarkThemeComponents
 import org.spotube.millennium.theme.MillenniumLightThemeComponents
 import org.spotube.millennium.theme.MillenniumPalette
 import org.spotube.millennium.theme.MillenniumTheme
 import org.spotube.millennium.theme.MillenniumThemeConfig
+import spotube.composeapp.generated.resources.Res
+import spotube.composeapp.generated.resources.plus_jakarta_sans_bold
+import spotube.composeapp.generated.resources.plus_jakarta_sans_extrabold
+import spotube.composeapp.generated.resources.plus_jakarta_sans_medium
+import spotube.composeapp.generated.resources.plus_jakarta_sans_regular
+import spotube.composeapp.generated.resources.plus_jakarta_sans_semibold
 
 /**
  * Semantic color roles used across the app, resolved from the active Millennium palette.
@@ -227,12 +237,25 @@ data class AppTypography(
     val labelSmall: TextStyle
 )
 
+/**
+ * Hodai's own typeface: Plus Jakarta Sans, bundled with the app. Applied to
+ * the app typography below and to the Millennium text theme in
+ * [SpotubeTheme], so library widgets speak the same type as our surfaces.
+ */
+val HodaiFontFamily = FontFamily(
+    Font(Res.font.plus_jakarta_sans_regular, FontWeight.Normal),
+    Font(Res.font.plus_jakarta_sans_medium, FontWeight.Medium),
+    Font(Res.font.plus_jakarta_sans_semibold, FontWeight.SemiBold),
+    Font(Res.font.plus_jakarta_sans_bold, FontWeight.Bold),
+    Font(Res.font.plus_jakarta_sans_extrabold, FontWeight.ExtraBold)
+)
+
 private fun style(
     size: Int,
     lineHeight: Int,
     weight: FontWeight = FontWeight.Normal
 ): TextStyle = TextStyle(
-    fontFamily = FontFamily.SansSerif,
+    fontFamily = HodaiFontFamily,
     fontSize = size.sp,
     lineHeight = lineHeight.sp,
     fontWeight = weight
@@ -302,6 +325,27 @@ fun SpotubeTheme(
     val darkTheme = MillenniumDarkThemeComponents
     val lightTheme = MillenniumLightThemeComponents
 
+    // The library-wide text theme, re-based on Hodai's typeface: every
+    // Millennium widget (sidebar, buttons, fields) resolves its text styles
+    // from this, so the font change reaches the whole app, not just the
+    // surfaces styled with AppTheme.typography.
+    val hodaiTextTheme = remember {
+        val base = defaultMillenniumTextTheme().states.default
+        MillenniumTextTheme(
+            MillenniumControlStateProperty.all(
+                base.copy(
+                    body = base.body.copy(fontFamily = HodaiFontFamily),
+                    label = base.label.copy(fontFamily = HodaiFontFamily),
+                    button = base.button.copy(fontFamily = HodaiFontFamily),
+                    title = base.title.copy(fontFamily = HodaiFontFamily),
+                    headline = base.headline.copy(fontFamily = HodaiFontFamily),
+                    caption = base.caption.copy(fontFamily = HodaiFontFamily),
+                    avatar = base.avatar.copy(fontFamily = HodaiFontFamily)
+                )
+            )
+        )
+    }
+
     MillenniumTheme(
         dark = isDarkTheme,
         config = MillenniumThemeConfig(
@@ -311,6 +355,7 @@ fun SpotubeTheme(
                 limeDark = HodaiDarkColors
             ),
             dark = darkTheme.copy(
+                textTheme = hodaiTextTheme,
                 topAppBarTheme = MillenniumTopAppBarTheme(
                     properties = darkTheme.topAppBarTheme.properties.copy(
                         separatorColor = Color.Transparent
@@ -319,6 +364,7 @@ fun SpotubeTheme(
                 modalBottomSheetTheme = compactModalBottomSheetTheme()
             ),
             light = lightTheme.copy(
+                textTheme = hodaiTextTheme,
                 topAppBarTheme = MillenniumTopAppBarTheme(
                     properties = lightTheme.topAppBarTheme.properties.copy(
                         separatorColor = Color.Transparent

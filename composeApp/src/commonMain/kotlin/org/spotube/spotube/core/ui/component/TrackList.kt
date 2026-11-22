@@ -386,7 +386,7 @@ fun TrackList(
                 .heightIn(max = 60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End)) {
-            if (showIndex || isSelectionMode) {
+            if (isSelectionMode) {
                 val allSelected =
                     visibleTracks.isNotEmpty() && selectedTrackIds.size == visibleTracks.size
                 val anySelected = selectedTrackIds.isNotEmpty()

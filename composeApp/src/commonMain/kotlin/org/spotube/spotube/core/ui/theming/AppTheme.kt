@@ -239,10 +239,13 @@ data class AppTypography(
 
 /**
  * Hodai's own typeface: Plus Jakarta Sans, bundled with the app. Applied to
- * the app typography below and to the Millennium text theme in
- * [SpotubeTheme], so library widgets speak the same type as our surfaces.
+ * the app typography and to the Millennium text theme in [SpotubeTheme], so
+ * library widgets speak the same type as our surfaces. The resource Font()
+ * calls are composable in this Compose Resources version, so the family is
+ * built inside composition and threaded into the plain style builders.
  */
-val HodaiFontFamily = FontFamily(
+@Composable
+private fun hodaiFontFamily(): FontFamily = FontFamily(
     Font(Res.font.plus_jakarta_sans_regular, FontWeight.Normal),
     Font(Res.font.plus_jakarta_sans_medium, FontWeight.Medium),
     Font(Res.font.plus_jakarta_sans_semibold, FontWeight.SemiBold),
@@ -251,31 +254,35 @@ val HodaiFontFamily = FontFamily(
 )
 
 private fun style(
+    family: FontFamily,
     size: Int,
     lineHeight: Int,
     weight: FontWeight = FontWeight.Normal
 ): TextStyle = TextStyle(
-    fontFamily = HodaiFontFamily,
+    fontFamily = family,
     fontSize = size.sp,
     lineHeight = lineHeight.sp,
     fontWeight = weight
 )
 
-val AppDefaultTypography = AppTypography(
-    displaySmall = style(36, 44),
-    headlineLarge = style(32, 40),
-    headlineMedium = style(28, 36),
-    headlineSmall = style(24, 32),
-    titleLarge = style(22, 28, FontWeight.Medium),
-    titleMedium = style(16, 24, FontWeight.Medium),
-    titleSmall = style(14, 20, FontWeight.Medium),
-    bodyLarge = style(16, 24),
-    bodyMedium = style(14, 20),
-    bodySmall = style(12, 16),
-    labelLarge = style(14, 20, FontWeight.Medium),
-    labelMedium = style(12, 16, FontWeight.Medium),
-    labelSmall = style(11, 16, FontWeight.Medium)
+private fun appTypography(family: FontFamily) = AppTypography(
+    displaySmall = style(family, 36, 44),
+    headlineLarge = style(family, 32, 40),
+    headlineMedium = style(family, 28, 36),
+    headlineSmall = style(family, 24, 32),
+    titleLarge = style(family, 22, 28, FontWeight.Medium),
+    titleMedium = style(family, 16, 24, FontWeight.Medium),
+    titleSmall = style(family, 14, 20, FontWeight.Medium),
+    bodyLarge = style(family, 16, 24),
+    bodyMedium = style(family, 14, 20),
+    bodySmall = style(family, 12, 16),
+    labelLarge = style(family, 14, 20, FontWeight.Medium),
+    labelMedium = style(family, 12, 16, FontWeight.Medium),
+    labelSmall = style(family, 11, 16, FontWeight.Medium)
 )
+
+/** Fallback for previews and the composition-local default. */
+val AppDefaultTypography = appTypography(FontFamily.SansSerif)
 
 /** Corner shapes used by the app. */
 @Immutable
@@ -329,18 +336,20 @@ fun SpotubeTheme(
     // Millennium widget (sidebar, buttons, fields) resolves its text styles
     // from this, so the font change reaches the whole app, not just the
     // surfaces styled with AppTheme.typography.
-    val hodaiTextTheme = remember {
+    val jakartaFamily = hodaiFontFamily()
+    val typography = remember(jakartaFamily) { appTypography(jakartaFamily) }
+    val hodaiTextTheme = remember(jakartaFamily) {
         val base = defaultMillenniumTextTheme().states.default
         MillenniumTextTheme(
             MillenniumControlStateProperty.all(
                 base.copy(
-                    body = base.body.copy(fontFamily = HodaiFontFamily),
-                    label = base.label.copy(fontFamily = HodaiFontFamily),
-                    button = base.button.copy(fontFamily = HodaiFontFamily),
-                    title = base.title.copy(fontFamily = HodaiFontFamily),
-                    headline = base.headline.copy(fontFamily = HodaiFontFamily),
-                    caption = base.caption.copy(fontFamily = HodaiFontFamily),
-                    avatar = base.avatar.copy(fontFamily = HodaiFontFamily)
+                    body = base.body.copy(fontFamily = jakartaFamily),
+                    label = base.label.copy(fontFamily = jakartaFamily),
+                    button = base.button.copy(fontFamily = jakartaFamily),
+                    title = base.title.copy(fontFamily = jakartaFamily),
+                    headline = base.headline.copy(fontFamily = jakartaFamily),
+                    caption = base.caption.copy(fontFamily = jakartaFamily),
+                    avatar = base.avatar.copy(fontFamily = jakartaFamily)
                 )
             )
         )
@@ -378,7 +387,7 @@ fun SpotubeTheme(
         MillenniumTooltipHost {
             CompositionLocalProvider(
                 LocalAppColors provides colors,
-                LocalAppTypography provides AppDefaultTypography,
+                LocalAppTypography provides typography,
                 LocalAppShapes provides AppDefaultShapes,
                 content = content
             )

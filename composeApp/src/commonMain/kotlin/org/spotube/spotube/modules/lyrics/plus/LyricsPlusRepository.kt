@@ -60,6 +60,7 @@ class LyricsPlusRepository(
         val cacheLanguage =
             "$appLanguage|r${if (romajiEnabled) 1 else 0}t${if (translationEnabled) 1 else 0}"
 
+        var heldPlainCache: LyricsPlusResult? = null
         cache.read(track.id, cacheLanguage)?.let { entry ->
             // The cached layers were computed over the cached lyrics text.
             // If the plugin now serves a different edit of the same song
@@ -70,16 +71,24 @@ class LyricsPlusRepository(
                 ?: entry.plainLyrics?.split("\n")
             val primaryLines = primary?.syncedLyrics?.map { it.text }
                 ?: primary?.plainLyrics?.split("\n")
-            if (primaryLines == null || cachedLines == null ||
-                primaryLines == cachedLines
+            val cacheResult = LyricsPlusResult(
+                syncedLyrics = entry.syncedLyrics,
+                plainLyrics = entry.plainLyrics,
+                songLanguage = entry.songLanguage,
+                romajiLines = entry.romajiLines,
+                translationLines = entry.translationLines)
+            // A plain-only cache entry must not lock out the fallback
+            // chain when the plugin has nothing either: the chain's
+            // fuzzy search may well hold the synced lyrics the plugin's
+            // exact match missed. Hold the entry as a floor instead and
+            // let the chain try.
+            val lockOut = entry.syncedLyrics.isNullOrEmpty() && primaryLines == null
+            if ((primaryLines == null || cachedLines == null ||
+                    primaryLines == cachedLines) && !lockOut
             ) {
-                return LyricsPlusResult(
-                    syncedLyrics = entry.syncedLyrics,
-                    plainLyrics = entry.plainLyrics,
-                    songLanguage = entry.songLanguage,
-                    romajiLines = entry.romajiLines,
-                    translationLines = entry.translationLines)
+                return cacheResult
             }
+            if (lockOut) heldPlainCache = cacheResult
         }
 
         var source = SOURCE_PLUGIN
@@ -87,7 +96,8 @@ class LyricsPlusRepository(
             it.syncedLyrics?.isNotEmpty() == true || !it.plainLyrics.isNullOrBlank()
         }
         if (response == null) {
-            val fallback = fallbackSource.getLyrics(track) ?: return null
+            val fallback = fallbackSource.getLyrics(track)
+                ?: return heldPlainCache ?: return null
             response = fallback.response
             source = fallback.source
         }

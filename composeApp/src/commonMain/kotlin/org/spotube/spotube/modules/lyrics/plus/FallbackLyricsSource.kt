@@ -93,17 +93,24 @@ class FallbackLyricsSource(
     private suspend fun lrcLibSearch(track: MetadataTrack): LyricsResponse? =
         withTimeoutOrNull(TIMEOUT_MS) {
             try {
-                val items = httpClientFactory.json.get {
-                    url {
-                        takeFrom("https://lrclib.net/api/search")
-                        parameters.append("track_name", track.title)
-                        track.artists.firstOrNull()
-                            ?.let { parameters.append("artist_name", it.name) }
+                // YouTube Music titles Japanese songs as "正解 - Seikai":
+                // one combined string that no lyrics database indexes, so
+                // the exact title finds nothing while each half does. Try
+                // the full title first, then each side of the dash.
+                val usable = mutableListOf<LrcLibSearchItem>()
+                for (candidate in titleVariants(track.title)) {
+                    val items = httpClientFactory.json.get {
+                        url {
+                            takeFrom("https://lrclib.net/api/search")
+                            parameters.append("track_name", candidate)
+                            track.artists.firstOrNull()
+                                ?.let { parameters.append("artist_name", it.name) }
+                        }
+                    }.body<List<LrcLibSearchItem>>()
+                    usable += items.filter {
+                        !it.syncedLyrics.isNullOrBlank() || !it.plainLyrics.isNullOrBlank()
                     }
-                }.body<List<LrcLibSearchItem>>()
-
-                val usable = items.filter {
-                    !it.syncedLyrics.isNullOrBlank() || !it.plainLyrics.isNullOrBlank()
+                    if (usable.any { !it.syncedLyrics.isNullOrBlank() }) break
                 }
                 if (usable.isEmpty()) return@withTimeoutOrNull null
 
@@ -183,6 +190,19 @@ class FallbackLyricsSource(
             }
         }
 
+    /**
+     * Title forms worth searching for: the full title, plus — for dual
+     * titles joined by " - " (the YouTube Music "original - romaji"
+     * convention) — each side on its own, original first, then romaji.
+     */
+    private fun titleVariants(title: String): List<String> {
+        val parts = title.split(" - ")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+        if (parts.size < 2) return listOf(title)
+        return (listOf(title) + parts).distinct()
+    }
+
     /** NetEase LRC files open with composer/lyricist credit lines; drop them. */
     private fun isCreditLine(text: String): Boolean {
         val trimmed = text.trim()
@@ -202,7 +222,7 @@ class FallbackLyricsSource(
                 val response = httpClientFactory.json.get {
                     url {
                         takeFrom("https://api.lyrics.ovh/v1/")
-                        appendPathSegments(artist, track.title)
+                        appendPathSegments(artist, titleVariants(track.title).last())
                     }
                 }.body<JsonObject>()
 

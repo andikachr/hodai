@@ -66,10 +66,11 @@ import com.composeunstyled.rememberModalBottomSheetState
 import com.composeunstyled.Text
 import com.composeunstyled.LocalTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -590,18 +591,19 @@ fun AppExpandedPlayer(
             }
 
             Column(modifier = Modifier.padding(top = 20.dp)) {
-                MillenniumSlider(
-                    value = seekProgress,
-                    onValueChange = {
+                SpectrumSeekBar(
+                    progress = seekProgress,
+                    isPlaying = playerUiState.isPlaying,
+                    enabled = playerUiState.seekDuration.inWholeMilliseconds > 0L,
+                    seedKey = playerUiState.title,
+                    onSeekChange = {
                         seekProgress = it
                         isSeeking = true
                     },
-                    onValueChangeFinished = {
+                    onSeekFinished = {
                         isSeeking = false
                         onSeekFinished()
                     },
-                    enabled = playerUiState.seekDuration.inWholeMilliseconds > 0L,
-                    label = stringResource(Res.string.player_seek_label),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(
@@ -691,13 +693,6 @@ fun AppExpandedPlayer(
                 }
             }
 
-            SpectrumStrip(
-                isPlaying = playerUiState.isPlaying,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-
             LyricsPreviewCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -730,13 +725,35 @@ private fun rememberSharedAlbumArtModifier(
 }
 
 /**
- * Decorative spectrum strip (owner-requested, locked mock): bars dance
- * while music plays and settle when paused. It is a visual rhythm layer,
- * not an FFT of the audio; if the playback engine ever exposes samples,
- * only the level function needs to change.
+ * The seek bar as a spectrum (owner-requested, locked mock): the plain
+ * progress slider is replaced by a waveform of bars. Bars behind the
+ * playhead glow gold-green and dance gently while playing; bars ahead stay
+ * dim. Tap or drag anywhere on the strip to seek. The bar heights are a
+ * decorative pattern seeded per track, not an FFT of the audio.
  */
 @Composable
-private fun SpectrumStrip(isPlaying: Boolean, modifier: Modifier = Modifier) {
+private fun SpectrumSeekBar(
+    progress: Float,
+    isPlaying: Boolean,
+    enabled: Boolean,
+    seedKey: String,
+    onSeekChange: (Float) -> Unit,
+    onSeekFinished: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val barCount = 56
+    val heights = remember(seedKey) {
+        val trackSeed = seedKey.hashCode().toDouble()
+        List(barCount) { i ->
+            val rand = (
+                (kotlin.math.sin(i * 12.9898 + trackSeed) * 43758.5453) % 1.0 + 1.0
+                ) % 1.0
+            val shape = 0.55 + 0.45 * kotlin.math.sin(i * 0.5 + trackSeed % 3.0) *
+                kotlin.math.sin(i * 0.19 + 1.1)
+            (0.18 + 0.82 * (shape * 0.65 + rand * 0.35)).coerceIn(0.1, 1.0).toFloat()
+        }
+    }
+
     var phase by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(isPlaying) {
         if (!isPlaying) return@LaunchedEffect
@@ -748,43 +765,62 @@ private fun SpectrumStrip(isPlaying: Boolean, modifier: Modifier = Modifier) {
             }
         }
     }
-    val energy by animateFloatAsState(
-        targetValue = if (isPlaying) 1f else 0.12f,
-        animationSpec = tween(600),
-        label = "spectrum_energy"
-    )
-    val barBrush = Brush.verticalGradient(
+
+    val playedBrush = Brush.verticalGradient(
         listOf(AppTheme.colors.primary, MillenniumTheme.colors.highlight)
     )
+    val playedCount = (progress.coerceIn(0f, 1f) * barCount).toInt()
 
     Row(
         modifier = modifier
-            .height(54.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(AppTheme.colors.surface.copy(alpha = 0.45f))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(3.dp)
+            .height(46.dp)
+            .pointerInput(enabled) {
+                if (!enabled) return@pointerInput
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    onSeekChange(
+                        (down.position.x / size.width).coerceIn(0f, 1f)
+                    )
+                    down.consume()
+                    var change = down
+                    while (change.pressed) {
+                        val event = awaitPointerEvent()
+                        change = event.changes.firstOrNull() ?: break
+                        if (change.pressed) {
+                            onSeekChange(
+                                (change.position.x / size.width)
+                                    .coerceIn(0f, 1f)
+                            )
+                            change.consume()
+                        }
+                    }
+                    onSeekFinished()
+                }
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.5.dp)
     ) {
-        repeat(40) { i ->
-            val seed = (
-                (kotlin.math.sin(i * 12.9898) * 43758.5453) % 1.0 + 1.0
-                ) % 1.0
-            val wave = 0.5 + 0.5 * kotlin.math.sin(
-                phase * (1.1 + seed * 0.9) + i * 0.55
-            )
-            val wave2 = 0.5 + 0.5 * kotlin.math.sin(
-                phase * 0.7 + i * 0.23 + seed * 6.28
-            )
-            val level = ((0.15 + 0.85 * wave * wave2) * energy)
-                .toFloat()
-                .coerceIn(0.06f, 1f)
+        heights.forEachIndexed { i, base ->
+            val played = i < playedCount
+            val dance = if (played && isPlaying) {
+                0.88f + 0.12f * kotlin.math.sin(phase * 2.6 + i * 0.7).toFloat()
+            } else {
+                1f
+            }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight(level)
+                    .height((base * dance * 44f).dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(barBrush)
+                    .then(
+                        if (played) {
+                            Modifier.background(playedBrush)
+                        } else {
+                            Modifier.background(
+                                MillenniumTheme.colors.muted.copy(alpha = 0.3f)
+                            )
+                        }
+                    )
             )
         }
     }

@@ -70,6 +70,7 @@ import org.spotube.spotube.modules.settings.sections.cacheSection
 import org.spotube.spotube.modules.settings.sections.desktopSection
 import org.spotube.spotube.modules.settings.sections.downloadsSection
 import org.spotube.spotube.modules.settings.sections.languageRegionSection
+import org.spotube.spotube.modules.settings.sections.lyricsSection
 import org.spotube.spotube.modules.settings.sections.playbackSection
 import org.spotube.spotube.modules.settings.sections.aboutSection
 import org.spotube.spotube.modules.settings.sections.SettingsPageTitle
@@ -85,6 +86,7 @@ import org.spotube.spotube.resources.iconsax.IconsaxForbidden
 import org.spotube.spotube.resources.iconsax.IconsaxImportArrow2
 import org.spotube.spotube.resources.iconsax.IconsaxInformation
 import org.spotube.spotube.resources.iconsax.IconsaxLanguageSquare
+import org.spotube.spotube.resources.iconsax.IconsaxMicrophone
 import org.spotube.spotube.resources.iconsax.IconsaxMusicPlay
 import org.spotube.spotube.resources.iconsax.IconsaxSoundTwotone
 import org.jetbrains.compose.resources.StringResource
@@ -102,6 +104,7 @@ import spotube.composeapp.generated.resources.settings_section_desktop
 import spotube.composeapp.generated.resources.settings_section_downloads
 import spotube.composeapp.generated.resources.settings_section_jam
 import spotube.composeapp.generated.resources.settings_section_language_region
+import spotube.composeapp.generated.resources.settings_section_lyrics
 import spotube.composeapp.generated.resources.settings_section_playback
 import spotube.composeapp.generated.resources.settings_section_plugins
 
@@ -124,6 +127,7 @@ internal enum class SettingsTab(
     Caching(Res.string.settings_section_caching, Iconsax.IconsaxDocumentDownload),
     Downloads(Res.string.settings_section_downloads, Iconsax.IconsaxDirectboxReceive),
     Desktop(Res.string.settings_section_desktop, Iconsax.IconsaxImportArrow2),
+    Lyrics(Res.string.settings_section_lyrics, Iconsax.IconsaxMicrophone),
     About(Res.string.settings_section_about, Iconsax.IconsaxInformation),
     // Plugins are an advanced topic: last tab instead of the first.
     Plugins(Res.string.settings_section_plugins, Iconsax.IconsaxBoxAdd),
@@ -319,6 +323,9 @@ private fun SettingsTabContent(
 
                             SettingsTab.Desktop ->
                                 desktopSection(settings, settingsViewModel, includeHeader = false)
+
+                            SettingsTab.Lyrics ->
+                                lyricsSection(settings, settingsViewModel, includeHeader = false)
 
                             SettingsTab.About -> {
                                 aboutSection(includeHeader = false)

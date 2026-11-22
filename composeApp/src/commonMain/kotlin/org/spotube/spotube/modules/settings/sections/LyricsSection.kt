@@ -39,7 +39,8 @@ import spotube.composeapp.generated.resources.settings_section_lyrics
 /** Hodai Lyrics Plus preferences: the romaji and translation layers. */
 internal fun LazyListScope.lyricsSection(
     settings: UserSettings,
-    settingsViewModel: SettingsViewModel) {
+    settingsViewModel: SettingsViewModel,
+    includeHeader: Boolean = true) {
 
     val cards: List<@Composable () -> Unit> = buildList {
         add {
@@ -98,6 +99,8 @@ internal fun LazyListScope.lyricsSection(
         }
     }
 
-    settingsSectionHeader(Res.string.settings_section_lyrics)
+    if (includeHeader) {
+        settingsSectionHeader(Res.string.settings_section_lyrics)
+    }
     settingsSectionCard(items = cards)
 }

@@ -119,7 +119,7 @@
     <string name="settings_section_support">Dukungan</string>
     <string name="settings_section_about">Tentang</string>
     <string name="settings_about_version">Versi %1$s</string>
-    <string name="settings_about_description">Hodai adalah aplikasi pemutar musik. Katalog lagunya dari YouTube Music, jadi kebanyakan lagu yang kamu cari ada di sini. Liriknya bergeser mengikuti lagu yang diputar. Khusus lagu Jepang, di bawah tiap baris lirik ada romajinya, jadi lebih gampang diikuti kalau mau ikut menyanyi. Tiap baris lirik juga bisa diterjemahkan ke bahasa yang kamu pakai di aplikasi. Lagu dan playlist bisa diunduh buat didengarkan tanpa internet. Tidak ada iklan, dan kamu tidak perlu membuat akun.</string>
+    <string name="settings_about_description">Pemutar YouTube Music yang simpel, buat HP dan komputer. Lagu langsung diputar, liriknya ikut tampil mengikuti lagu, dan unduhanmu siap diputar pas lagi nggak ada internet. Nggak ada iklan, nggak perlu akun.</string>
     <string name="settings_about_feature_lyrics_title">Lirik tersinkron</string>
     <string name="settings_about_feature_lyrics_subtitle">Romaji di bawah lirik lagu Jepang, dan terjemahan tiap baris dalam bahasa aplikasimu</string>
     <string name="settings_about_feature_offline_title">Dengerin offline</string>

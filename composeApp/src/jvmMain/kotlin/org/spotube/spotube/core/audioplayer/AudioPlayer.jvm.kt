@@ -264,7 +264,6 @@ actual class AudioPlayer actual constructor(context: Any) : AudioPlayerInterface
         try {
             if (!enabled) {
                 mediaPlayer.audio().setEqualizer(null)
-                currentEqualizer?.release()
                 currentEqualizer = null
                 return
             }
@@ -272,7 +271,6 @@ actual class AudioPlayer actual constructor(context: Any) : AudioPlayerInterface
             val presetName = if (equalizerApi.presets().contains(preset)) preset else "Flat"
             val next = equalizerApi.newEqualizer(presetName)
             mediaPlayer.audio().setEqualizer(next)
-            currentEqualizer?.release()
             currentEqualizer = next
             logger.d { "Equalizer applied: $presetName" }
         } catch (e: Exception) {

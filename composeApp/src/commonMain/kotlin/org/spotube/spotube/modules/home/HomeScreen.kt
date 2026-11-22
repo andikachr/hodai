@@ -454,7 +454,6 @@ private fun HomeContent(
     }
 }
 
-@Composable
 /** Hodai: the signed-in user's own listening history, replayable in one tap. */
 @Composable
 private fun HomeRecentsSection(
@@ -488,6 +487,7 @@ private fun HomeRecentsSection(
     }
 }
 
+@Composable
 private fun HomeSection(
     title: String,
     subtitle: String? = null,

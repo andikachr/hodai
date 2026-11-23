@@ -34,9 +34,11 @@ import org.spotube.spotube.core.network.HttpJson
  * when [LyricsLanguageDetector] could only say "other".
  *
  * Lines are translated in newline-joined batches (chunks of ~1200 chars). If
- * a batch comes back with a different line count, that batch falls back to
- * one request per line. Every failure is silent: the result is null (or the
- * affected lines stay null) and the original lyrics render on their own.
+ * a batch comes back with a different line count — or with a count that only
+ * coincidentally matches while a line was merged and another split — that
+ * batch falls back to one request per line. Every failure is silent: the
+ * result is null (or the affected lines stay null) and the original lyrics
+ * render on their own.
  */
 class LyricsTranslator(
     private val httpClientFactory: HttpClientFactory) {
@@ -87,15 +89,42 @@ class LyricsTranslator(
         val combined = requestTranslation(texts.joinToString("\n"), targetLanguage)
             ?: return null
         val parts = combined.split("\n")
-        if (parts.size == texts.size) return parts
+        if (parts.size == texts.size &&
+            parts.indices.all { index -> isPlausiblePair(texts[index], parts[index]) }
+        ) {
+            return parts
+        }
 
-        // Line counts drifted (the translator merged or split a line):
-        // redo this batch line by line so alignment is guaranteed.
+        // Line counts drifted, or the count only coincidentally matches
+        // while the pairing shifted (a merge here, a split there): redo
+        // this batch line by line so alignment is guaranteed.
         val perLine = ArrayList<String>(texts.size)
         for (text in texts) {
             perLine.add(requestTranslation(text, targetLanguage) ?: return null)
         }
         return perLine
+    }
+
+    /**
+     * Sanity check for one source/translated pair from a batch reply. A
+     * merged line comes back far longer than its source while the line it
+     * swallowed comes back blank or stub-short, so a blank part for a
+     * non-blank source, or a wild length ratio either way, marks the
+     * whole batch as untrustworthy.
+     */
+    private fun isPlausiblePair(source: String, translated: String): Boolean {
+        if (translated.isBlank()) return false
+        val sourceLength = source.trim().length
+        val translatedLength = translated.trim().length
+        if (translatedLength > sourceLength * MAX_LENGTH_RATIO + LENGTH_SLACK) {
+            return false
+        }
+        if (sourceLength >= MIN_SOURCE_FOR_SHORT_CHECK &&
+            translatedLength * MAX_LENGTH_RATIO + LENGTH_SLACK < sourceLength
+        ) {
+            return false
+        }
+        return true
     }
 
     /** One raw gtx request; returns the full translated text or null. */
@@ -127,5 +156,10 @@ class LyricsTranslator(
     companion object {
         private const val MAX_CHUNK_CHARS = 1200
         private const val REQUEST_TIMEOUT_MS = 10_000L
+
+        /** Batch-pair sanity bounds; see [isPlausiblePair]. */
+        private const val MAX_LENGTH_RATIO = 3
+        private const val LENGTH_SLACK = 10
+        private const val MIN_SOURCE_FOR_SHORT_CHECK = 20
     }
 }

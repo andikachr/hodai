@@ -60,8 +60,15 @@ class LyricsPlusRepository(
         // The "v2" prefix orphans entries computed before the reading
         // layer covered Korean and Mandarin: those entries stored a null
         // reading for songs that can now produce one.
+        // The "v3" prefix orphans entries computed before the fallback
+        // chain learned to distrust duration-implausible candidates and
+        // the translator learned to distrust coincidentally-aligned
+        // batches: those entries can hold a wrong version's lyrics or
+        // shifted translation lines, and the read path below serves a
+        // cached entry unchallenged whenever the plugin answers empty,
+        // so a poisoned pick would otherwise stick forever.
         val cacheLanguage =
-            "v2|$appLanguage|r${if (romajiEnabled) 1 else 0}t${if (translationEnabled) 1 else 0}"
+            "v3|$appLanguage|r${if (romajiEnabled) 1 else 0}t${if (translationEnabled) 1 else 0}"
 
         var heldPlainCache: LyricsPlusResult? = null
         cache.read(track.id, cacheLanguage)?.let { entry ->

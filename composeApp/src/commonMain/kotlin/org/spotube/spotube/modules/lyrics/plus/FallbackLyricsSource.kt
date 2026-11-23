@@ -50,9 +50,11 @@ data class FallbackResult(
  *    both synced and plain lyrics, so there is no separate plain-text path to
  *    add there. `/api/search` is the genuinely different second LRCLib path:
  *    a fuzzy search whose best candidate (synced first, then closest
- *    duration) often exists when the exact match does not.
- * 2. **NetEase** (`music.163.com`) — best effort: cloud search for the song
- *    id, then its LRC. Short timeout, any error means "no lyrics here".
+ *    duration, among duration-plausible candidates) often exists when
+ *    the exact match does not.
+ * 2. **NetEase** (`music.163.com`) — best effort: cloud search for the
+ *    song id (first hit whose duration fits the track), then its LRC.
+ *    Short timeout, any error means "no lyrics here".
  * 3. **lyrics.ovh** — plain (unsynced) lyrics only, as a last resort so the
  *    Plain tab still has something when nobody has timings.
  *
@@ -115,22 +117,42 @@ class FallbackLyricsSource(
                 if (usable.isEmpty()) return@withTimeoutOrNull null
 
                 val trackSeconds = if (track.durationMs > 0) track.durationMs / 1000.0 else null
-                val best = usable.minWithOrNull(
-                    compareBy(
-                        { it.syncedLyrics.isNullOrBlank() },
-                        { item: LrcLibSearchItem ->
-                            if (trackSeconds != null && item.duration != null) {
-                                abs(item.duration - trackSeconds)
-                            } else {
-                                Double.MAX_VALUE
-                            }
-                        })
-                ) ?: return@withTimeoutOrNull null
+                fun durationDiff(item: LrcLibSearchItem): Double =
+                    if (trackSeconds != null && item.duration != null) {
+                        abs(item.duration - trackSeconds)
+                    } else {
+                        Double.MAX_VALUE
+                    }
+                val byFit = compareBy<LrcLibSearchItem>(
+                    { it.syncedLyrics.isNullOrBlank() },
+                    { item -> durationDiff(item) })
+
+                // A synced candidate whose duration sits far from the
+                // track's is almost certainly another version (live,
+                // extended, a cover): its timings cannot fit this track,
+                // however close it ranks. Duration-plausible candidates
+                // get the pick first; only when none is plausible may an
+                // implausible one still floor the result with its plain
+                // text — its synced lines are dropped.
+                val plausible = usable.filter {
+                    trackSeconds == null || it.duration == null ||
+                        abs(it.duration - trackSeconds) <= MAX_DURATION_DIFF_SECONDS
+                }
+                val best = if (plausible.isNotEmpty()) {
+                    plausible.minWithOrNull(byFit)
+                } else {
+                    usable.minWithOrNull(byFit)
+                } ?: return@withTimeoutOrNull null
+                val bestIsPlausible = plausible.isNotEmpty() && best in plausible
 
                 LyricsResponse(
-                    syncedLyrics = best.syncedLyrics
-                        ?.let { LrcParser.parse(it) }
-                        ?.takeIf { it.isNotEmpty() },
+                    syncedLyrics = if (bestIsPlausible) {
+                        best.syncedLyrics
+                            ?.let { LrcParser.parse(it) }
+                            ?.takeIf { it.isNotEmpty() }
+                    } else {
+                        null
+                    },
                     plainLyrics = best.plainLyrics)
             } catch (e: Exception) {
                 null
@@ -151,16 +173,33 @@ class FallbackLyricsSource(
                         takeFrom("https://music.163.com/api/cloudsearch/pc")
                         parameters.append("s", query)
                         parameters.append("type", "1")
-                        parameters.append("limit", "3")
+                        parameters.append("limit", "5")
                     }
                     header(HttpHeaders.UserAgent, BROWSER_USER_AGENT)
                 }.body<JsonObject>()
 
-                val songId = search["result"]?.jsonObject
+                val songs = search["result"]?.jsonObject
                     ?.get("songs")?.jsonArray
-                    ?.firstOrNull()?.jsonObject
-                    ?.get("id")?.jsonPrimitive?.longOrNull
                     ?: return@withTimeoutOrNull null
+
+                // The first cloud-search hit is not necessarily this
+                // track — covers and same-title songs rank well too —
+                // and its synced lyrics would be served (and cached) as
+                // this track's. Prefer the first hit whose duration
+                // fits the track; when the track duration is known and
+                // no hit fits, this source has nothing trustworthy.
+                val songId = songs.firstNotNullOfOrNull { song ->
+                    val obj = song.jsonObject
+                    val id = obj["id"]?.jsonPrimitive?.longOrNull
+                        ?: return@firstNotNullOfOrNull null
+                    val songMs = obj["duration"]?.jsonPrimitive?.longOrNull
+                        ?: obj["dt"]?.jsonPrimitive?.longOrNull
+                    when {
+                        track.durationMs <= 0 || songMs == null -> id
+                        abs(songMs - track.durationMs) <= MAX_DURATION_DIFF_MS -> id
+                        else -> null
+                    }
+                } ?: return@withTimeoutOrNull null
 
                 val lyricResponse = httpClientFactory.json.get {
                     url {
@@ -245,6 +284,15 @@ class FallbackLyricsSource(
 
         private const val TIMEOUT_MS = 7_000L
         private const val BROWSER_USER_AGENT = "Mozilla/5.0"
+
+        /**
+         * How far a fallback candidate's duration may sit from the
+         * track's before it counts as a different version. Album vs
+         * single edits of one recording differ by a few seconds; live,
+         * extended and cover versions differ by far more.
+         */
+        private const val MAX_DURATION_DIFF_SECONDS = 15.0
+        private const val MAX_DURATION_DIFF_MS = 15_000L
     }
 }
 

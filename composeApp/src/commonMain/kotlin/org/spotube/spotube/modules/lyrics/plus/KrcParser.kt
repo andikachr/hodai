@@ -49,7 +49,7 @@ internal object KrcParser {
             val masked = base64.decodeBase64()?.toByteArray() ?: return null
             if (masked.size <= 4) return null
             val plain = ByteArray(masked.size) { index ->
-                (masked[index].toInt() xor XOR_KEY[index % XOR_KEY.size]).toByte()
+                (masked[index].toInt() xor XOR_KEY[index % XOR_KEY.size].toInt()).toByte()
             }
             val magic = plain.copyOfRange(0, 4).decodeToString()
             if (magic != "krc1") return null

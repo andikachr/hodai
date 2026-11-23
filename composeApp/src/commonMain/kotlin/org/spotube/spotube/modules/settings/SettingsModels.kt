@@ -54,6 +54,8 @@ data class UserSettings(
     // Lyrics Plus (Hodai layered lyrics: romaji + per-line translation)
     val lyricsRomajiEnabled: Boolean = true,
     val lyricsTranslationEnabled: Boolean = true,
+    // Karaoke: word-timed lyrics (KuGou KRC) as the preferred Lirik+ source
+    val lyricsKaraokeEnabled: Boolean = true,
 
     // Desktop equalizer (VLC presets, applied by the JVM player)
     val equalizerEnabled: Boolean = false,

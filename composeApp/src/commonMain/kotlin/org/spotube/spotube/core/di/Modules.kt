@@ -72,6 +72,7 @@ import org.spotube.spotube.modules.library.playlist.LibraryPlaylistsViewModel
 import org.spotube.spotube.modules.lyrics.FloatingLyricsModel
 import org.spotube.spotube.modules.lyrics.LyricsViewModel
 import org.spotube.spotube.modules.lyrics.plus.FallbackLyricsSource
+import org.spotube.spotube.modules.lyrics.plus.KuGouLyricsSource
 import org.spotube.spotube.modules.lyrics.plus.LyricsPlusCache
 import org.spotube.spotube.modules.lyrics.plus.LyricsPlusRepository
 import org.spotube.spotube.modules.lyrics.plus.LyricsTranslator
@@ -264,6 +265,7 @@ val sharedModules = module {
     }
 
     // Lyrics
+    singleOf(::KuGouLyricsSource)
     singleOf(::FallbackLyricsSource)
     singleOf(::LyricsTranslator)
     singleOf(::LyricsPlusCache)

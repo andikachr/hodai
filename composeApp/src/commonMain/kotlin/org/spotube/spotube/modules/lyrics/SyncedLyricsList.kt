@@ -60,12 +60,18 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.Text
 import org.spotube.plugin_interfaces.plugin_apis.lyrics.LyricsLine
 import org.spotube.spotube.core.ui.theming.AppTheme
+import org.spotube.spotube.modules.lyrics.plus.LyricsWord
+import org.spotube.spotube.modules.lyrics.plus.LyricsWordLine
 import org.spotube.millennium.theme.MillenniumTheme
 
 private const val LYRICS_BLANK_LINE = "\u266A"
@@ -83,7 +89,11 @@ fun SyncedLyricsList(
     modifier: Modifier = Modifier,
     onLineClick: ((LyricsLine) -> Unit)? = null,
     romajiLines: List<String?>? = null,
-    translationLines: List<String?>? = null
+    translationLines: List<String?>? = null,
+    /** Karaoke word segments aligned with [lines]; null = line-timed only. */
+    wordLines: List<LyricsWordLine?>? = null,
+    /** Playback position for the karaoke sweep; -1 disables word highlighting. */
+    positionMs: Long = -1L
 ) {
     val listState = rememberLazyListState()
     val colors = MillenniumTheme.colors
@@ -124,6 +134,12 @@ fun SyncedLyricsList(
                     else romajiLines?.getOrNull(index)?.takeIf { it.isNotBlank() }
                 val translation = if (line.text.isBlank()) null
                     else translationLines?.getOrNull(index)?.takeIf { it.isNotBlank() }
+                // Karaoke words only ever light up the active line.
+                val wordLine = if (isCurrent && line.text.isNotBlank()) {
+                    wordLines?.getOrNull(index)
+                } else {
+                    null
+                }
                 if (onLineClick != null) {
                     ImmersiveLyricLine(
                         text = text,
@@ -131,6 +147,8 @@ fun SyncedLyricsList(
                         translation = translation,
                         distance = kotlin.math.abs(index - currentIndex),
                         isCurrent = isCurrent,
+                        wordLine = wordLine,
+                        positionMs = positionMs,
                         onClick = { onLineClick(line) }
                     )
                 } else {
@@ -202,6 +220,8 @@ private fun ImmersiveLyricLine(
     translation: String?,
     distance: Int,
     isCurrent: Boolean,
+    wordLine: LyricsWordLine? = null,
+    positionMs: Long = -1L,
     onClick: () -> Unit
 ) {
     val colors = MillenniumTheme.colors
@@ -246,17 +266,39 @@ private fun ImmersiveLyricLine(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.Start
         ) {
-            Text(
-                text = text,
-                style = (
-                    if (isCurrent) AppTheme.typography.displaySmall
-                    else AppTheme.typography.headlineSmall
-                    ).copy(
-                    fontWeight = FontWeight.Bold,
-                    color = colors.text
-                ),
-                textAlign = TextAlign.Start
-            )
+            // Karaoke: the active line renders word by word when it has
+            // word timings; every other line renders whole, as before.
+            val karaokeWords = wordLine?.words?.takeIf {
+                isCurrent && it.isNotEmpty() && positionMs >= 0L
+            }
+            if (karaokeWords != null) {
+                Text(
+                    text = buildKaraokeText(
+                        words = karaokeWords,
+                        positionMs = positionMs,
+                        sungColor = colors.accent,
+                        activeColor = colors.accent,
+                        activeBackground = colors.accent.copy(alpha = 0.25f),
+                        pendingColor = colors.text),
+                    style = AppTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = colors.text
+                    ),
+                    textAlign = TextAlign.Start
+                )
+            } else {
+                Text(
+                    text = text,
+                    style = (
+                        if (isCurrent) AppTheme.typography.displaySmall
+                        else AppTheme.typography.headlineSmall
+                        ).copy(
+                        fontWeight = FontWeight.Bold,
+                        color = colors.text
+                    ),
+                    textAlign = TextAlign.Start
+                )
+            }
             if (distance <= 2 && romaji != null) {
                 Text(
                     text = romaji,
@@ -278,6 +320,32 @@ private fun ImmersiveLyricLine(
                 )
             }
         }
+    }
+}
+
+/**
+ * Builds the active line as a word-by-word karaoke sweep: words already
+ * sung take the full accent, the word being sung takes the accent on a
+ * soft accent wash, and the words still to come keep the line's normal
+ * colour. Word texts concatenate back into the line, so wrapping and
+ * width match the plain rendering.
+ */
+internal fun buildKaraokeText(
+    words: List<LyricsWord>,
+    positionMs: Long,
+    sungColor: Color,
+    activeColor: Color,
+    activeBackground: Color,
+    pendingColor: Color): AnnotatedString = buildAnnotatedString {
+    for (word in words) {
+        val style = when {
+            positionMs >= word.endMs -> SpanStyle(color = sungColor)
+            positionMs >= word.startMs -> SpanStyle(
+                color = activeColor,
+                background = activeBackground)
+            else -> SpanStyle(color = pendingColor)
+        }
+        withStyle(style) { append(word.text) }
     }
 }
 

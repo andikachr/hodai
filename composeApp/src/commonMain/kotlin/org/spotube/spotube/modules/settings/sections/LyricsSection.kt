@@ -26,23 +26,44 @@ import org.spotube.spotube.modules.settings.components.SwitchSettingCard
 import org.spotube.spotube.resources.iconsax.Iconsax
 import org.spotube.spotube.resources.iconsax.IconsaxLanguageSquare
 import org.spotube.spotube.resources.iconsax.IconsaxMicrophone
+import org.spotube.spotube.resources.iconsax.IconsaxMusic
 import org.spotube.spotube.resources.iconsax.IconsaxMusicPlay
 import spotube.composeapp.generated.resources.Res
 import spotube.composeapp.generated.resources.settings_floating_lyrics_subtitle
 import spotube.composeapp.generated.resources.settings_floating_lyrics_title
+import spotube.composeapp.generated.resources.settings_lyrics_karaoke_subtitle
+import spotube.composeapp.generated.resources.settings_lyrics_karaoke_title
 import spotube.composeapp.generated.resources.settings_lyrics_romaji_subtitle
 import spotube.composeapp.generated.resources.settings_lyrics_romaji_title
 import spotube.composeapp.generated.resources.settings_lyrics_translation_subtitle
 import spotube.composeapp.generated.resources.settings_lyrics_translation_title
 import spotube.composeapp.generated.resources.settings_section_lyrics
 
-/** Hodai Lyrics Plus preferences: the romaji and translation layers. */
+/** Hodai Lyrics Plus preferences: karaoke source, romaji and translation layers. */
 internal fun LazyListScope.lyricsSection(
     settings: UserSettings,
     settingsViewModel: SettingsViewModel,
     includeHeader: Boolean = true) {
 
     val cards: List<@Composable () -> Unit> = buildList {
+        add {
+            SwitchSettingCard(
+                title = stringResource(Res.string.settings_lyrics_karaoke_title),
+                subtitle = stringResource(Res.string.settings_lyrics_karaoke_subtitle),
+                icon = {
+                    SettingsItemIcon(
+                        Iconsax.IconsaxMusic,
+                        stringResource(Res.string.settings_lyrics_karaoke_title)
+                    )
+                },
+                checked = settings.lyricsKaraokeEnabled,
+                onCheckedChange = { enabled ->
+                    settingsViewModel.updateSettings {
+                        copy(lyricsKaraokeEnabled = enabled)
+                    }
+                }
+            )
+        }
         add {
             SwitchSettingCard(
                 title = stringResource(Res.string.settings_lyrics_romaji_title),

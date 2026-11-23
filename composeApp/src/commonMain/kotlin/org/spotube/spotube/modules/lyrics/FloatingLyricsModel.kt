@@ -16,6 +16,8 @@ import org.spotube.spotube.core.audioplayer.AudioPlayerInterface
 import org.spotube.spotube.core.audioplayer.AudioPlayerQueue
 import org.spotube.spotube.core.audioplayer.QueueEntry
 import org.spotube.spotube.modules.lyrics.plus.LyricsPlusRepository
+import org.spotube.spotube.modules.lyrics.plus.LyricsWord
+import org.spotube.spotube.modules.lyrics.plus.LyricsWordLine
 import org.spotube.spotube.modules.lyrics.plus.systemLanguageCode
 import org.spotube.spotube.modules.plugin.PluginManager
 import org.spotube.spotube.modules.settings.SettingsProvider
@@ -26,7 +28,11 @@ data class FloatingLyricsState(
     val currentLine: String? = null,
     val nextLine: String? = null,
     val romajiLine: String? = null,
-    val translationLine: String? = null)
+    val translationLine: String? = null,
+    /** Karaoke words of the current line; null = line-timed only. */
+    val currentWords: List<LyricsWord>? = null,
+    /** Playback position for the karaoke sweep; -1 = unknown. */
+    val positionMs: Long = -1L)
 
 /**
  * Hodai floating lyrics (desktop): app-level line source for the overlay
@@ -44,24 +50,34 @@ class FloatingLyricsModel(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val syncedLines = MutableStateFlow<List<LyricsLine>?>(null)
+    private val wordLines = MutableStateFlow<List<LyricsWordLine?>?>(null)
     private val romajiLines = MutableStateFlow<List<String?>?>(null)
     private val translationLines = MutableStateFlow<List<String?>?>(null)
     private val title = MutableStateFlow("")
 
+    // Lines and their karaoke words travel as one pair: the words are
+    // only meaningful against the exact line set they were resolved with.
+    private val linesWithWords = combine(syncedLines, wordLines) { lines, words ->
+        lines to words
+    }
+
     val state: StateFlow<FloatingLyricsState> =
         combine(
-            syncedLines,
+            linesWithWords,
             audioPlayer.positionFlow,
             romajiLines,
             translationLines,
-            title) { lines, position, romaji, translation, trackTitle ->
+            title) { paired, position, romaji, translation, trackTitle ->
+            val (lines, words) = paired
             val index = activeLineIndex(lines, position.inWholeMilliseconds)
             FloatingLyricsState(
                 trackTitle = trackTitle,
                 currentLine = lines?.getOrNull(index)?.text,
                 nextLine = lines?.getOrNull(index + 1)?.text,
                 romajiLine = romaji?.getOrNull(index),
-                translationLine = translation?.getOrNull(index))
+                translationLine = translation?.getOrNull(index),
+                currentWords = words?.getOrNull(index)?.words,
+                positionMs = position.inWholeMilliseconds)
         }.stateIn(scope, SharingStarted.Eagerly, FloatingLyricsState())
 
     private var currentTrackId: String? = null
@@ -74,6 +90,7 @@ class FloatingLyricsModel(
                     currentTrackId = null
                     title.value = ""
                     syncedLines.value = null
+                    wordLines.value = null
                     romajiLines.value = null
                     translationLines.value = null
                     return@collect
@@ -82,6 +99,7 @@ class FloatingLyricsModel(
                 currentTrackId = track.id
                 title.value = track.title
                 syncedLines.value = null
+                wordLines.value = null
                 romajiLines.value = null
                 translationLines.value = null
                 load(track)
@@ -104,12 +122,17 @@ class FloatingLyricsModel(
                     pluginLyrics,
                     effectiveAppLanguage(),
                     romajiEnabled = currentSettings?.lyricsRomajiEnabled ?: true,
-                    translationEnabled = currentSettings?.lyricsTranslationEnabled ?: true)
+                    translationEnabled = currentSettings?.lyricsTranslationEnabled ?: true,
+                    karaokeEnabled = currentSettings?.lyricsKaraokeEnabled ?: true)
             } catch (e: Exception) {
                 null
             }
             if (currentTrackId != track.id) return
             syncedLines.value = plusResult?.syncedLyrics ?: pluginLyrics?.syncedLyrics
+            // Words pair only with the plus result's own line set; when
+            // the plugin's lines are what shows, the strip stays per-line.
+            wordLines.value =
+                if (plusResult?.syncedLyrics != null) plusResult.wordLines else null
             romajiLines.value = plusResult?.romajiLines
             translationLines.value = plusResult?.translationLines
         } catch (e: Exception) {

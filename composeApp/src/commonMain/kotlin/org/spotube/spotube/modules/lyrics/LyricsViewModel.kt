@@ -27,6 +27,7 @@ import org.spotube.spotube.core.audioplayer.LoopState
 import org.spotube.spotube.core.audioplayer.PlayerState
 import org.spotube.spotube.core.audioplayer.QueueEntry
 import org.spotube.spotube.modules.lyrics.plus.LyricsPlusRepository
+import org.spotube.spotube.modules.lyrics.plus.LyricsWordLine
 import org.spotube.spotube.modules.lyrics.plus.systemLanguageCode
 import org.spotube.spotube.modules.plugin.PluginManager
 import org.spotube.spotube.modules.settings.SettingsProvider
@@ -58,6 +59,8 @@ data class LyricsUiState(
     val romajiLines: List<String?>? = null,
     /** Lirik+ translation layer, aligned the same way; null = no layer. */
     val translationLines: List<String?>? = null,
+    /** Karaoke word segments aligned with [syncedLyrics]; null = line-timed only. */
+    val wordLines: List<LyricsWordLine?>? = null,
     val isLoading: Boolean = false,
     /** True while the plugin came back empty and fallback sources are being tried. */
     val isSearchingFallback: Boolean = false,
@@ -74,7 +77,9 @@ data class LyricsUiState(
     val loopState: LoopState = LoopState.NONE,
     /** Lirik+ layer switches, mirrored from the user settings. */
     val romajiEnabled: Boolean = true,
-    val translationEnabled: Boolean = true)
+    val translationEnabled: Boolean = true,
+    /** Karaoke (word-timed source) switch, mirrored from the user settings. */
+    val karaokeEnabled: Boolean = true)
 
 class LyricsViewModel(
     private val pluginManager: PluginManager,
@@ -139,7 +144,8 @@ class LyricsViewModel(
     fun loadLyrics(
         forceReload: Boolean = false,
         romajiEnabled: Boolean? = null,
-        translationEnabled: Boolean? = null) {
+        translationEnabled: Boolean? = null,
+        karaokeEnabled: Boolean? = null) {
         viewModelScope.launch {
             val entry = audioPlayerQueue.currentQueueEntryFlow.value ?: return@launch
             val track = when (entry) {
@@ -161,7 +167,8 @@ class LyricsViewModel(
                     error = null,
                     isSearchingFallback = false,
                     romajiLines = null,
-                    translationLines = null)
+                    translationLines = null,
+                    wordLines = null)
             }
             try {
                 var pluginLyrics: LyricsResponse? = null
@@ -185,13 +192,16 @@ class LyricsViewModel(
                 val useRomaji = romajiEnabled ?: currentSettings?.lyricsRomajiEnabled ?: true
                 val useTranslation = translationEnabled
                     ?: currentSettings?.lyricsTranslationEnabled ?: true
+                val useKaraoke = karaokeEnabled
+                    ?: currentSettings?.lyricsKaraokeEnabled ?: true
                 val plusResult = try {
                     lyricsPlusRepository.resolve(
                         track,
                         pluginLyrics,
                         effectiveAppLanguage(),
                         romajiEnabled = useRomaji,
-                        translationEnabled = useTranslation)
+                        translationEnabled = useTranslation,
+                        karaokeEnabled = useKaraoke)
                 } catch (e: Exception) {
                     null
                 }
@@ -220,8 +230,10 @@ class LyricsViewModel(
                         plainLyrics = displayPlain,
                         romajiLines = plusResult?.romajiLines,
                         translationLines = plusResult?.translationLines,
+                        wordLines = plusResult?.wordLines,
                         romajiEnabled = useRomaji,
                         translationEnabled = useTranslation,
+                        karaokeEnabled = useKaraoke,
                         // Unless the user picked a mode for this track, open
                         // on the synced stage when synced lines exist and on
                         // the plain page otherwise (never a blank stage).

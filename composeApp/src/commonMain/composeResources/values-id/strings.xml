@@ -109,6 +109,8 @@
     <string name="settings_lyrics_romaji_subtitle">Tampilkan cara baca tiap baris (romaji, romanisasi, pinyin) di bawah liriknya</string>
     <string name="settings_lyrics_translation_title">Terjemahan lirik</string>
     <string name="settings_lyrics_translation_subtitle">Terjemahkan tiap baris ke bahasa aplikasi. Baris yang sudah berbahasa sama dibiarkan apa adanya</string>
+    <string name="settings_lyrics_karaoke_title">Lirik karaoke kata per kata</string>
+    <string name="settings_lyrics_karaoke_subtitle">Utamakan lirik bertiming kata (KuGou) biar tiap kata menyala pas dinyanyikan. Lagu tanpa timing kata tetap pakai lirik per baris</string>
     <string name="settings_section_downloads">Unduhan</string>
     <string name="settings_section_caching">Cache</string>
     <string name="settings_section_desktop">Desktop</string>

@@ -53,14 +53,38 @@ fun FloatingLyricsStrip(model: FloatingLyricsModel) {
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis)
                 } else {
-                    Text(
-                        text = current,
-                        style = AppTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = AppTheme.colors.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis)
+                    // Karaoke when the current line carries word timings:
+                    // same sweep colours as the lyrics stage, on the
+                    // strip's own palette (primary = the gold accent).
+                    val words = state.currentWords?.takeIf {
+                        it.isNotEmpty() && state.positionMs >= 0L
+                    }
+                    if (words != null) {
+                        Text(
+                            text = buildKaraokeText(
+                                words = words,
+                                positionMs = state.positionMs,
+                                sungColor = AppTheme.colors.primary,
+                                activeColor = AppTheme.colors.primary,
+                                activeBackground =
+                                    AppTheme.colors.primary.copy(alpha = 0.25f),
+                                pendingColor = AppTheme.colors.onSurface),
+                            style = AppTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = AppTheme.colors.onSurface,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis)
+                    } else {
+                        Text(
+                            text = current,
+                            style = AppTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = AppTheme.colors.onSurface,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis)
+                    }
                     state.romajiLine?.takeIf { it.isNotBlank() }?.let { romaji ->
                         Text(
                             text = romaji,

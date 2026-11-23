@@ -29,20 +29,31 @@ data class LyricsPlusResult(
     /** Aligned with the display lines (synced lines, or plain lines when unsynced). */
     val romajiLines: List<String?>?,
     /** Aligned the same way; null when the song already is in the app language. */
-    val translationLines: List<String?>?)
+    val translationLines: List<String?>?,
+    /**
+     * Karaoke word segments aligned with [syncedLyrics]; null when the
+     * winning source was line-timed only. A null entry marks a wordless
+     * line inside an otherwise word-timed result.
+     */
+    val wordLines: List<LyricsWordLine?>? = null)
 
 /**
  * Orchestrates Lirik+ for one track:
  *
  * 1. Serve the per-track cache when present (same app language).
- * 2. Otherwise take the selected plugin's lyrics; when they are empty, walk
+ * 2. Karaoke first: when enabled, [KuGouLyricsSource] is the preferred
+ *    source — word timings beat line timings. Its duration gates keep a
+ *    wrong version from displacing the line-timed answer.
+ * 3. Otherwise take the selected plugin's lyrics; when they are empty, walk
  *    the [FallbackLyricsSource] chain instead of giving up.
- * 3. Detect the song language, then derive layers under the smart rules:
+ * 4. Detect the song language, then derive layers under the smart rules:
  *    romaji only for Japanese songs, translation only when the song language
- *    differs from the app language.
- * 4. Persist the whole resolution so reopening the song is instant.
+ *    differs from the app language. Layers are always computed over the
+ *    winning source's own line set, never mixed across sources.
+ * 5. Persist the whole resolution so reopening the song is instant.
  */
 class LyricsPlusRepository(
+    private val kuGouSource: KuGouLyricsSource,
     private val fallbackSource: FallbackLyricsSource,
     private val translator: LyricsTranslator,
     private val romajiProvider: RomajiProvider,
@@ -53,7 +64,8 @@ class LyricsPlusRepository(
         primary: LyricsResponse?,
         appLanguage: String,
         romajiEnabled: Boolean = true,
-        translationEnabled: Boolean = true): LyricsPlusResult? {
+        translationEnabled: Boolean = true,
+        karaokeEnabled: Boolean = true): LyricsPlusResult? {
 
         // The layer toggles change the result, so they ride along in the
         // cache key: flipping a switch must not serve the other variant.
@@ -67,8 +79,15 @@ class LyricsPlusRepository(
         // shifted translation lines, and the read path below serves a
         // cached entry unchallenged whenever the plugin answers empty,
         // so a poisoned pick would otherwise stick forever.
+        // The "v4" prefix orphans everything again for karaoke: the
+        // result shape now carries word segments, and the karaoke flag
+        // joins the key because it changes which source wins — with it
+        // on, the display lines can be KuGou's edit of the song, so the
+        // layers of the line-timed variant must never be served for it.
         val cacheLanguage =
-            "v3|$appLanguage|r${if (romajiEnabled) 1 else 0}t${if (translationEnabled) 1 else 0}"
+            "v4|$appLanguage|r${if (romajiEnabled) 1 else 0}" +
+                "t${if (translationEnabled) 1 else 0}" +
+                "k${if (karaokeEnabled) 1 else 0}"
 
         var heldPlainCache: LyricsPlusResult? = null
         cache.read(track.id, cacheLanguage)?.let { entry ->
@@ -86,7 +105,8 @@ class LyricsPlusRepository(
                 plainLyrics = entry.plainLyrics,
                 songLanguage = entry.songLanguage,
                 romajiLines = entry.romajiLines,
-                translationLines = entry.translationLines)
+                translationLines = entry.translationLines,
+                wordLines = entry.wordLines)
             // A plain-only cache entry must not lock out the fallback
             // chain when neither it nor the plugin has synced lyrics:
             // the chain's fuzzy search may well hold the synced lyrics
@@ -102,12 +122,34 @@ class LyricsPlusRepository(
             if (lockOut) heldPlainCache = cacheResult
         }
 
+        var source = SOURCE_PLUGIN
+        var response: LyricsResponse? = null
+        var wordLines: List<LyricsWordLine?>? = null
+
+        // Karaoke first: a word-timed KuGou result is the preferred
+        // answer when the song is in its catalogue. The source's own
+        // duration gates (song hit, lyrics candidate, timing coverage)
+        // are what keep a wrong version from winning here.
+        if (karaokeEnabled) {
+            val kugou = try {
+                kuGouSource.getWordLyrics(track)
+            } catch (e: Exception) {
+                null
+            }
+            if (kugou != null && kugou.response.syncedLyrics?.isNotEmpty() == true) {
+                response = kugou.response
+                source = KuGouLyricsSource.SOURCE_KUGOU
+                wordLines = kugou.wordLines
+            }
+        }
+
         // The plugin is the answer only when it has SYNCED lyrics. A
         // plain-only plugin answer does not end the search: the fallback
         // chain hunts synced lyrics first and its plain result is only a
         // floor, exactly as between the chain's own sources.
-        var source = SOURCE_PLUGIN
-        var response = primary?.takeIf { it.syncedLyrics?.isNotEmpty() == true }
+        if (response == null) {
+            response = primary?.takeIf { it.syncedLyrics?.isNotEmpty() == true }
+        }
         if (response == null) {
             val fallback = fallbackSource.getLyrics(track)
             if (fallback != null &&
@@ -161,7 +203,8 @@ class LyricsPlusRepository(
             plainLyrics = response.plainLyrics,
             songLanguage = songLanguage,
             romajiLines = romajiLines,
-            translationLines = translationLines)
+            translationLines = translationLines,
+            wordLines = wordLines)
 
         cache.write(
             LyricsPlusCacheEntry(
@@ -172,7 +215,8 @@ class LyricsPlusRepository(
                 syncedLyrics = response.syncedLyrics,
                 plainLyrics = response.plainLyrics,
                 romajiLines = romajiLines,
-                translationLines = translationLines))
+                translationLines = translationLines,
+                wordLines = wordLines))
 
         return result
     }

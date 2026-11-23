@@ -114,6 +114,8 @@
     <string name="settings_lyrics_romaji_subtitle">Show how each line is read (romaji, romanization, pinyin) under the lyrics</string>
     <string name="settings_lyrics_translation_title">Lyric translations</string>
     <string name="settings_lyrics_translation_subtitle">Translate each line into the app language. Lines already in that language are left as they are</string>
+    <string name="settings_lyrics_karaoke_title">Karaoke word-by-word lyrics</string>
+    <string name="settings_lyrics_karaoke_subtitle">Prefer word-timed lyrics (KuGou) so each word lights up as it is sung. Songs without word timings keep line-by-line lyrics</string>
     <string name="settings_section_downloads">Downloads</string>
     <string name="settings_section_caching">Caching</string>
     <string name="settings_section_desktop">Desktop</string>

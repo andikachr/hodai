@@ -45,7 +45,9 @@ data class LyricsPlusCacheEntry(
     val syncedLyrics: List<LyricsLine>? = null,
     val plainLyrics: String? = null,
     val romajiLines: List<String?>? = null,
-    val translationLines: List<String?>? = null)
+    val translationLines: List<String?>? = null,
+    /** Karaoke word segments aligned with [syncedLyrics]; null = line-timed only. */
+    val wordLines: List<LyricsWordLine?>? = null)
 
 /**
  * File-per-track JSON cache in the app cache dir (`lyrics_plus/`), following

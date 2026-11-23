@@ -77,6 +77,7 @@ import kotlin.time.Duration
 import org.spotube.plugin_interfaces.plugin_apis.lyrics.LyricsLine
 import org.spotube.spotube.core.audioplayer.LoopState
 import org.spotube.spotube.core.ui.component.ApplicationBackButton
+import org.spotube.spotube.modules.lyrics.plus.LyricsWordLine
 import org.spotube.spotube.modules.settings.SettingsViewModel
 import org.spotube.spotube.modules.shell.formatPlayerTime
 import org.spotube.spotube.resources.iconsax.Iconsax
@@ -297,7 +298,9 @@ private fun ColumnScope.LyricsBody(uiState: LyricsUiState, viewModel: LyricsView
             currentIndex = uiState.currentIndex,
             onLineClick = viewModel::seekToLine,
             romajiLines = uiState.romajiLines,
-            translationLines = uiState.translationLines
+            translationLines = uiState.translationLines,
+            wordLines = uiState.wordLines,
+            positionMs = uiState.position.inWholeMilliseconds
         )
 
         uiState.mode == LyricType.STATIC -> PlainLyricsContent(
@@ -523,7 +526,9 @@ private fun ColumnScope.SyncedLyricsContent(
     currentIndex: Int,
     onLineClick: (LyricsLine) -> Unit,
     romajiLines: List<String?>? = null,
-    translationLines: List<String?>? = null) {
+    translationLines: List<String?>? = null,
+    wordLines: List<LyricsWordLine?>? = null,
+    positionMs: Long = -1L) {
     if (syncedLyrics.isEmpty()) {
         CenteredMessage {
             Text(
@@ -542,6 +547,8 @@ private fun ColumnScope.SyncedLyricsContent(
         onLineClick = onLineClick,
         romajiLines = romajiLines,
         translationLines = translationLines,
+        wordLines = wordLines,
+        positionMs = positionMs,
         modifier = Modifier.weight(1f).fillMaxWidth()
     )
 }

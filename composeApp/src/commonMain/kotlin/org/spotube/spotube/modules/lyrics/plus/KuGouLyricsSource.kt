@@ -17,12 +17,14 @@
 
 package org.spotube.spotube.modules.lyrics.plus
 
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
@@ -102,7 +104,7 @@ class KuGouLyricsSource(
                 parameters.append("showtype", "1")
             }
             header(HttpHeaders.UserAgent, BROWSER_USER_AGENT)
-        }.body<JsonObject>()
+        }.bodyJson()
 
         val infos = searchResponse["data"]?.jsonObject
             ?.get("info")?.jsonArray
@@ -149,7 +151,7 @@ class KuGouLyricsSource(
                 if (hash != null) parameters.append("hash", hash)
             }
             header(HttpHeaders.UserAgent, BROWSER_USER_AGENT)
-        }.body<JsonObject>()
+        }.bodyJson()
 
         val candidates = search["candidates"]?.jsonArray
             ?.map { it.jsonObject }
@@ -181,7 +183,7 @@ class KuGouLyricsSource(
                 parameters.append("charset", "utf8")
             }
             header(HttpHeaders.UserAgent, BROWSER_USER_AGENT)
-        }.body<JsonObject>()
+        }.bodyJson()
 
         val content = download["content"]?.jsonPrimitive?.contentOrNull
             ?.takeIf { it.isNotBlank() }
@@ -230,6 +232,15 @@ class KuGouLyricsSource(
                 plainLyrics = lines.joinToString("\n") { it.text }),
             wordLines = wordLines)
     }
+
+    /**
+     * KuGou's song search answers with a `text/html` content type even
+     * though the body is JSON, and Ktor's content negotiation refuses
+     * to transform that into a JsonObject (NoTransformationFound). Read
+     * every KuGou answer as plain text and parse it by hand instead.
+     */
+    private suspend fun HttpResponse.bodyJson(): JsonObject =
+        Json.parseToJsonElement(bodyAsText()).jsonObject
 
     private fun isDurationPlausible(track: MetadataTrack, candidateMs: Long?): Boolean =
         track.durationMs <= 0 || candidateMs == null ||

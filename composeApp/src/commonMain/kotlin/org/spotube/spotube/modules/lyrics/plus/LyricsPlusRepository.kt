@@ -35,7 +35,9 @@ data class LyricsPlusResult(
      * winning source was line-timed only. A null entry marks a wordless
      * line inside an otherwise word-timed result.
      */
-    val wordLines: List<LyricsWordLine?>? = null)
+    val wordLines: List<LyricsWordLine?>? = null,
+    /** Diagnostic label for the lyrics header: which source won, or where KuGou stopped. */
+    val sourceNote: String? = null)
 
 /**
  * Orchestrates Lirik+ for one track:
@@ -84,8 +86,11 @@ class LyricsPlusRepository(
         // joins the key because it changes which source wins — with it
         // on, the display lines can be KuGou's edit of the song, so the
         // layers of the line-timed variant must never be served for it.
+        // The "v6" prefix orphans v5 entries: a wordless result cached
+        // by a build whose KuGou decode was broken must not be served
+        // to the fixed build.
         val cacheLanguage =
-            "v5|$appLanguage|r${if (romajiEnabled) 1 else 0}" +
+            "v6|$appLanguage|r${if (romajiEnabled) 1 else 0}" +
                 "t${if (translationEnabled) 1 else 0}" +
                 "k${if (karaokeEnabled) 1 else 0}"
 
@@ -106,7 +111,8 @@ class LyricsPlusRepository(
                 songLanguage = entry.songLanguage,
                 romajiLines = entry.romajiLines,
                 translationLines = entry.translationLines,
-                wordLines = entry.wordLines)
+                wordLines = entry.wordLines,
+                sourceNote = if (entry.wordLines != null) "Karaoke KuGou" else null)
             // A plain-only cache entry must not lock out the fallback
             // chain when neither it nor the plugin has synced lyrics:
             // the chain's fuzzy search may well hold the synced lyrics
@@ -115,7 +121,8 @@ class LyricsPlusRepository(
             val lockOut = entry.syncedLyrics.isNullOrEmpty() &&
                 primary?.syncedLyrics?.isNotEmpty() != true
             if ((primaryLines == null || cachedLines == null ||
-                    primaryLines == cachedLines) && !lockOut
+                    primaryLines == cachedLines) && !lockOut &&
+                !(karaokeEnabled && entry.wordLines == null)
             ) {
                 return cacheResult
             }
@@ -130,6 +137,7 @@ class LyricsPlusRepository(
         // answer when the song is in its catalogue. The source's own
         // duration gates (song hit, lyrics candidate, timing coverage)
         // are what keep a wrong version from winning here.
+        var kugouDiagnostic: String? = null
         if (karaokeEnabled) {
             val kugou = try {
                 kuGouSource.getWordLyrics(track)
@@ -140,6 +148,8 @@ class LyricsPlusRepository(
                 response = kugou.response
                 source = KuGouLyricsSource.SOURCE_KUGOU
                 wordLines = kugou.wordLines
+            } else {
+                kugouDiagnostic = kuGouSource.lastDiagnostic
             }
         }
 
@@ -204,19 +214,29 @@ class LyricsPlusRepository(
             songLanguage = songLanguage,
             romajiLines = romajiLines,
             translationLines = translationLines,
-            wordLines = wordLines)
+            wordLines = wordLines,
+            sourceNote = when {
+                wordLines != null -> "Karaoke KuGou"
+                karaokeEnabled -> "KuGou gagal: ${kugouDiagnostic ?: "?"}"
+                else -> null
+            })
 
-        cache.write(
-            LyricsPlusCacheEntry(
-                trackId = track.id,
-                targetLanguage = cacheLanguage,
-                songLanguage = songLanguage,
-                source = source,
-                syncedLyrics = response.syncedLyrics,
-                plainLyrics = response.plainLyrics,
-                romajiLines = romajiLines,
-                translationLines = translationLines,
-                wordLines = wordLines))
+        // A wordless result while karaoke is on is not cached: the
+        // KuGou lookup may have failed transiently, and caching the
+        // fallback would silence karaoke for this track forever.
+        if (!(karaokeEnabled && wordLines == null)) {
+            cache.write(
+                LyricsPlusCacheEntry(
+                    trackId = track.id,
+                    targetLanguage = cacheLanguage,
+                    songLanguage = songLanguage,
+                    source = source,
+                    syncedLyrics = response.syncedLyrics,
+                    plainLyrics = response.plainLyrics,
+                    romajiLines = romajiLines,
+                    translationLines = translationLines,
+                    wordLines = wordLines))
+        }
 
         return result
     }

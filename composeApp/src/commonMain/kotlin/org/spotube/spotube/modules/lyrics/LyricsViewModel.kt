@@ -61,6 +61,8 @@ data class LyricsUiState(
     val translationLines: List<String?>? = null,
     /** Karaoke word segments aligned with [syncedLyrics]; null = line-timed only. */
     val wordLines: List<LyricsWordLine?>? = null,
+    /** Diagnostic label shown in the lyrics header (winning source / KuGou stop point). */
+    val sourceNote: String? = null,
     val isLoading: Boolean = false,
     /** True while the plugin came back empty and fallback sources are being tried. */
     val isSearchingFallback: Boolean = false,
@@ -168,7 +170,8 @@ class LyricsViewModel(
                     isSearchingFallback = false,
                     romajiLines = null,
                     translationLines = null,
-                    wordLines = null)
+                    wordLines = null,
+                    sourceNote = null)
             }
             try {
                 var pluginLyrics: LyricsResponse? = null
@@ -231,6 +234,7 @@ class LyricsViewModel(
                         romajiLines = plusResult?.romajiLines,
                         translationLines = plusResult?.translationLines,
                         wordLines = plusResult?.wordLines,
+                        sourceNote = plusResult?.sourceNote,
                         romajiEnabled = useRomaji,
                         translationEnabled = useTranslation,
                         karaokeEnabled = useKaraoke,

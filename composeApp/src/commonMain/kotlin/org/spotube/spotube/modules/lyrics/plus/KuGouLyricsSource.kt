@@ -62,14 +62,30 @@ data class KuGouResult(
 class KuGouLyricsSource(
     private val httpClientFactory: HttpClientFactory) {
 
-    suspend fun getWordLyrics(track: MetadataTrack): KuGouResult? =
-        withTimeoutOrNull(TIMEOUT_MS) {
+    /**
+     * Diagnostic: where the last lookup stopped (a short stage tag), so
+     * a silent "no karaoke" can be told apart from a dead network, a
+     * decode failure, or a duration-gate rejection. Null after success.
+     */
+    var lastDiagnostic: String? = null
+
+    suspend fun getWordLyrics(track: MetadataTrack): KuGouResult? {
+        lastDiagnostic = null
+        val result = withTimeoutOrNull(TIMEOUT_MS) {
             try {
                 searchAndFetch(track)
             } catch (e: Exception) {
+                if (lastDiagnostic == null) {
+                    lastDiagnostic = "http/${e::class.simpleName ?: "error"}"
+                }
                 null
             }
         }
+        if (result == null && lastDiagnostic == null) {
+            lastDiagnostic = "timeout"
+        }
+        return result
+    }
 
     private suspend fun searchAndFetch(track: MetadataTrack): KuGouResult? {
         val artist = track.artists.firstOrNull()?.name.orEmpty()
@@ -138,7 +154,10 @@ class KuGouLyricsSource(
         val candidates = search["candidates"]?.jsonArray
             ?.map { it.jsonObject }
             ?.takeIf { it.isNotEmpty() }
-            ?: return null
+            ?: run {
+                lastDiagnostic = "cari-lirik"
+                return null
+            }
 
         // The lyrics candidate carries its own duration (milliseconds):
         // prefer the first plausible one, else the first candidate.
@@ -166,8 +185,14 @@ class KuGouLyricsSource(
 
         val content = download["content"]?.jsonPrimitive?.contentOrNull
             ?.takeIf { it.isNotBlank() }
-            ?: return null
-        val krcText = KrcParser.decodeContent(content) ?: return null
+            ?: run {
+                lastDiagnostic = "unduh"
+                return null
+            }
+        val krcText = KrcParser.decodeContent(content) ?: run {
+            lastDiagnostic = "dekode"
+            return null
+        }
         val parsed = KrcParser.parse(krcText)
 
         // Drop KuGou's liner-note lines (composer/lyricist credits) the
@@ -176,10 +201,16 @@ class KuGouLyricsSource(
             val text = parsed.lines[index].text
             text.isNotBlank() && !isCreditLine(text)
         }
-        if (kept.size < MIN_LINES) return null
+        if (kept.size < MIN_LINES) {
+            lastDiagnostic = "parse-sedikit"
+            return null
+        }
         val lines = kept.map { parsed.lines[it] }
         val wordLines = kept.map { parsed.wordLines[it] }
-        if (wordLines.all { it == null }) return null
+        if (wordLines.all { it == null }) {
+            lastDiagnostic = "parse-tanpa-kata"
+            return null
+        }
 
         // Coverage sanity: word timings ending far past the track's own
         // duration mean a different edit slipped through the gates.
@@ -187,7 +218,10 @@ class KuGouLyricsSource(
             val lastEnd = wordLines.filterNotNull()
                 .maxOfOrNull { line -> line.words.maxOfOrNull { it.endMs } ?: 0L }
                 ?: lines.last().time
-            if (lastEnd > track.durationMs + MAX_DURATION_OVERSHOOT_MS) return null
+            if (lastEnd > track.durationMs + MAX_DURATION_OVERSHOOT_MS) {
+                lastDiagnostic = "durasi-overshoot"
+                return null
+            }
         }
 
         return KuGouResult(

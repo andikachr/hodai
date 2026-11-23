@@ -182,7 +182,8 @@ fun LyricsScreen(
                         overflow = TextOverflow.Ellipsis)
                     Text(
                         text = uiState.trackArtists.uppercase() + " · " +
-                            stringResource(Res.string.settings_section_lyrics).uppercase(),
+                            stringResource(Res.string.settings_section_lyrics).uppercase() +
+                            (uiState.sourceNote?.let { " · " + it.uppercase() } ?: ""),
                         style = AppTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
                         color = colors.muted,
                         maxLines = 1,

@@ -85,7 +85,7 @@ class LyricsPlusRepository(
         // on, the display lines can be KuGou's edit of the song, so the
         // layers of the line-timed variant must never be served for it.
         val cacheLanguage =
-            "v4|$appLanguage|r${if (romajiEnabled) 1 else 0}" +
+            "v5|$appLanguage|r${if (romajiEnabled) 1 else 0}" +
                 "t${if (translationEnabled) 1 else 0}" +
                 "k${if (karaokeEnabled) 1 else 0}"
 

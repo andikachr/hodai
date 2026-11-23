@@ -48,12 +48,14 @@ internal object KrcParser {
         return try {
             val masked = base64.decodeBase64()?.toByteArray() ?: return null
             if (masked.size <= 4) return null
-            val plain = ByteArray(masked.size) { index ->
-                (masked[index].toInt() xor XOR_KEY[index % XOR_KEY.size].toInt()).toByte()
-            }
-            val magic = plain.copyOfRange(0, 4).decodeToString()
+            // The "krc1" header travels in the clear; only the bytes
+            // after it are XOR-masked (verified against a live payload).
+            val magic = masked.copyOfRange(0, 4).decodeToString()
             if (magic != "krc1") return null
-            ZlibInflate.inflateZlib(plain.copyOfRange(4, plain.size)).decodeToString()
+            val plain = ByteArray(masked.size - 4) { index ->
+                (masked[index + 4].toInt() xor XOR_KEY[index % XOR_KEY.size].toInt()).toByte()
+            }
+            ZlibInflate.inflateZlib(plain).decodeToString()
         } catch (e: Exception) {
             null
         }
